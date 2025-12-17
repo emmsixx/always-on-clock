@@ -1,0 +1,51 @@
+{
+  "name": "always-on-clock",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A lightweight, customizable desktop clock overlay that stays always-on-top",
+  "type": "module",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emmsixx/always-on-clock"
+  },
+  "keywords": [
+    "clock",
+    "desktop",
+    "overlay",
+    "tauri",
+    "always-on-top"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tauri-apps/api": "^2.9.1",
+    "@tauri-apps/plugin-autostart": "^2.5.1",
+    "@tauri-apps/plugin-global-shortcut": "^2.3.1",
+    "@tauri-apps/plugin-opener": "~2.2.7",
+    "@tauri-apps/plugin-positioner": "~2.2.1",
+    "@tauri-apps/plugin-store": "^2.4.1",
+    "lucide-react": "^0.561.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.2.17",
+    "@tauri-apps/cli": "^2.9.6",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "autoprefixer": "^10.4.23",
+    "jiti": "^2.6.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.0"
+  }
+}
