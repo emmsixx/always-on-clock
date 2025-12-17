@@ -59,7 +59,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Rust stable
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install Rust target (macOS ARM)
         if: matrix.args == '--target aarch64-apple-darwin'
