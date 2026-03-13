@@ -1,18 +1,36 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import React, { useState, useEffect, useRef } from "react";
 import { TrayIcon } from '@tauri-apps/api/tray';
 import { defaultWindowIcon } from "@tauri-apps/api/app";
 import { Menu } from '@tauri-apps/api/menu';
 import { Clock1, PinIcon, Settings as SettingsIcon } from "lucide-react";
-import Settings from "./components/Settings";
 
-interface TitleBarProps {
-  onSettingsOpen?: () => void;
+async function openSettingsWindow() {
+  const existing = await WebviewWindow.getByLabel('settings');
+  if (existing) {
+    await existing.setFocus();
+    return;
+  }
+
+  const webview = new WebviewWindow('settings', {
+    url: '/',
+    title: 'Settings',
+    width: 380,
+    height: 560,
+    resizable: false,
+    center: true,
+    decorations: false,
+    transparent: false,
+  });
+
+  webview.once('tauri://error', (e) => {
+    console.error('Failed to create settings window:', e);
+  });
 }
 
-const TitleBar: React.FC<TitleBarProps> = () => {
+const TitleBar: React.FC = () => {
   const [onTop, setOnTop] = useState<boolean | null>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const trayRef = useRef<TrayIcon | null>(null);
 
   useEffect(() => {
@@ -39,8 +57,9 @@ const TitleBar: React.FC<TitleBarProps> = () => {
         {
           id: 'settings',
           text: 'Settings',
-          action: () => {
-            setTop(false).then(() => setSettingsOpen(true));
+          action: async () => {
+            await setTop(false);
+            await openSettingsWindow();
           },
         },
         {
@@ -99,7 +118,7 @@ const TitleBar: React.FC<TitleBarProps> = () => {
           <div className="flex flex-row items-center space-x-1">
             <button
               className="p-1.5 hover:bg-gray-700 rounded transition-colors cursor-pointer"
-              onClick={() => setSettingsOpen(true)}
+              onClick={() => openSettingsWindow()}
               title="Settings"
             >
               <SettingsIcon className="w-4 h-4" />
@@ -114,7 +133,6 @@ const TitleBar: React.FC<TitleBarProps> = () => {
           </div>
         </div>
       )}
-      <Settings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   );
 };

@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Clock",
         "decorations": false,
         "transparent": true,
