@@ -20,9 +20,9 @@ async function openSettingsWindow() {
   const webview = new WebviewWindow('settings', {
     url: '/',
     title: 'Settings',
-    width: 380,
-    height: 560,
-    x: pos.x + size.width + 12,
+    width: 420,
+    height: 660,
+    x: pos.x + size.width + 16,
     y: pos.y,
     resizable: false,
     decorations: false,
@@ -114,22 +114,22 @@ const TitleBar: React.FC = () => {
       ) : onTop ? null : (
         <div
           data-tauri-drag-region
-          className="w-full cursor-move flex flex-row justify-between items-center text-white px-3 py-2 text-lg bg-[#0c0d0f] transition-all"
+          className="w-full cursor-move flex flex-row justify-between items-center text-white px-4 py-3 text-lg bg-[#0c0d0f] transition-all"
         >
-          <div className="flex flex-row items-center space-x-2 pointer-events-none">
+          <div className="flex flex-row items-center space-x-2.5 pointer-events-none">
             <Clock1 className="w-5 h-5" />
             <span className="text-sm font-medium">Clock</span>
           </div>
-          <div className="flex flex-row items-center space-x-1">
+          <div className="flex flex-row items-center space-x-1.5">
             <button
-              className="p-1.5 hover:bg-gray-700 rounded transition-colors cursor-pointer"
+              className="p-2 hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
               onClick={() => openSettingsWindow()}
               title="Settings"
             >
               <SettingsIcon className="w-4 h-4" />
             </button>
             <button
-              className="p-1.5 hover:bg-gray-700 rounded transition-colors cursor-pointer"
+              className="p-2 hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
               onClick={() => setTop(true)}
               title="Pin window (always on top)"
             >

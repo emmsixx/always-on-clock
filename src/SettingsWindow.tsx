@@ -14,12 +14,12 @@ const SettingsWindowContent: React.FC = () => {
     <div className="bg-[#1a1a1a] min-h-screen overflow-y-auto">
       <div
         data-tauri-drag-region
-        className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-gray-700 bg-[#1a1a1a] cursor-move"
+        className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-[#1a1a1a] cursor-move"
       >
         <h2 className="text-lg font-semibold text-white pointer-events-none">Settings</h2>
         <button
           onClick={handleClose}
-          className="p-1 hover:bg-gray-700 rounded transition-colors cursor-pointer"
+          className="p-1.5 hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
           title="Close settings"
         >
           <X className="w-5 h-5 text-gray-400" />
