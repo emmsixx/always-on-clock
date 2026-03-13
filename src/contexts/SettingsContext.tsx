@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Settings, DEFAULT_SETTINGS, THEMES } from '../types/settings';
-import { loadSettings, saveSettings } from '../utils/storage';
+import { loadSettings, saveSettings, getStore } from '../utils/storage';
 import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -45,6 +45,27 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   useEffect(() => {
     if (isLoading) return;
 
+    let unlisten: (() => void) | null = null;
+
+    getStore().then((store) => {
+      store.onKeyChange<Partial<Settings>>('settings', (newValue) => {
+        if (newValue) {
+          setSettings({ ...DEFAULT_SETTINGS, ...newValue });
+        }
+      }).then((fn) => {
+        unlisten = fn;
+      });
+    });
+
+    return () => {
+      unlisten?.();
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (getCurrentWindow().label !== 'main') return;
+
     const setupAutostart = async () => {
       const enabled = await isEnabled();
       if (settings.launchOnStartup && !enabled) {
@@ -59,6 +80,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   useEffect(() => {
     if (isLoading || !settings.globalShortcut) return;
+    if (getCurrentWindow().label !== 'main') return;
 
     const setupShortcut = async () => {
       try {

@@ -4,7 +4,7 @@ import { Settings, DEFAULT_SETTINGS } from '../types/settings';
 const STORE_NAME = 'settings.json';
 let store: Store | null = null;
 
-async function getStore(): Promise<Store> {
+export async function getStore(): Promise<Store> {
   if (!store) {
     store = await load(STORE_NAME);
   }
