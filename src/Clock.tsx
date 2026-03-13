@@ -60,7 +60,7 @@ const Clock = () => {
 
   return (
     <div
-      className="font-black w-fit p-2 pointer-events-none transition-all duration-200"
+      className="font-black w-fit px-5 py-4 pointer-events-none transition-all duration-200"
       style={{
         backgroundColor: bgColorWithOpacity,
         fontSize,
@@ -77,7 +77,7 @@ const Clock = () => {
       </span>
       {date && (
         <span
-          className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] block text-center"
+          className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] block text-center mt-1"
           style={{
             color: settings.textColor,
             opacity: settings.textOpacity * 0.8,

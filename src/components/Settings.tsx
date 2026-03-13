@@ -31,14 +31,14 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="px-6 py-5 space-y-7">
       {/* Time Format */}
       <section>
-        <h3 className="text-sm font-medium text-gray-300 mb-2">Time Format</h3>
-        <div className="flex gap-2">
+        <h3 className="text-sm font-medium text-gray-300 mb-3">Time Format</h3>
+        <div className="flex gap-3">
           <button
             onClick={() => handleTimeFormatChange('12h')}
-            className={`flex-1 py-2 px-3 rounded text-sm transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm transition-colors ${
               settings.timeFormat === '12h'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -48,7 +48,7 @@ const Settings: React.FC = () => {
           </button>
           <button
             onClick={() => handleTimeFormatChange('24h')}
-            className={`flex-1 py-2 px-3 rounded text-sm transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm transition-colors ${
               settings.timeFormat === '24h'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -61,7 +61,7 @@ const Settings: React.FC = () => {
 
       {/* Show Seconds */}
       <section>
-        <label className="flex items-center justify-between cursor-pointer">
+        <label className="flex items-center justify-between cursor-pointer py-1">
           <span className="text-sm font-medium text-gray-300">Show Seconds</span>
           <input
             type="checkbox"
@@ -74,11 +74,11 @@ const Settings: React.FC = () => {
 
       {/* Date Format */}
       <section>
-        <h3 className="text-sm font-medium text-gray-300 mb-2">Date Display</h3>
+        <h3 className="text-sm font-medium text-gray-300 mb-3">Date Display</h3>
         <select
           value={settings.dateFormat}
           onChange={(e) => handleDateFormatChange(e.target.value as DateFormat)}
-          className="w-full py-2 px-3 rounded bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:border-blue-500"
+          className="w-full py-2.5 px-4 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:border-blue-500"
         >
           <option value="none">Hidden</option>
           <option value="short">Short (12/17)</option>
@@ -89,13 +89,13 @@ const Settings: React.FC = () => {
 
       {/* Font Size */}
       <section>
-        <h3 className="text-sm font-medium text-gray-300 mb-2">Font Size</h3>
-        <div className="grid grid-cols-4 gap-2">
+        <h3 className="text-sm font-medium text-gray-300 mb-3">Font Size</h3>
+        <div className="grid grid-cols-4 gap-2.5">
           {(Object.keys(FONT_SIZES) as FontSize[]).map((size) => (
             <button
               key={size}
               onClick={() => handleFontSizeChange(size)}
-              className={`py-2 px-2 rounded text-xs capitalize transition-colors ${
+              className={`py-2.5 px-2 rounded-lg text-xs capitalize transition-colors ${
                 settings.fontSize === size
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -109,20 +109,20 @@ const Settings: React.FC = () => {
 
       {/* Theme */}
       <section>
-        <h3 className="text-sm font-medium text-gray-300 mb-2">Theme</h3>
-        <div className="grid grid-cols-2 gap-2">
+        <h3 className="text-sm font-medium text-gray-300 mb-3">Theme</h3>
+        <div className="grid grid-cols-2 gap-2.5">
           {THEMES.map((theme) => (
             <button
               key={theme.id}
               onClick={() => handleThemeChange(theme.id)}
-              className={`py-2 px-3 rounded text-sm transition-colors flex items-center gap-2 ${
+              className={`py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center gap-2.5 ${
                 settings.activeTheme === theme.id
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
               <span
-                className="w-4 h-4 rounded-full border border-gray-500"
+                className="w-4 h-4 rounded-full border border-gray-500 shrink-0"
                 style={{ backgroundColor: theme.textColor }}
               />
               {theme.name}
@@ -133,9 +133,9 @@ const Settings: React.FC = () => {
 
       {/* Custom Colors (only when custom theme is selected) */}
       {settings.activeTheme === 'custom' && (
-        <section className="space-y-3">
+        <section className="space-y-4">
           <h3 className="text-sm font-medium text-gray-300">Custom Colors</h3>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-1">
             <span className="text-sm text-gray-400">Text Color</span>
             <input
               type="color"
@@ -144,7 +144,7 @@ const Settings: React.FC = () => {
               className="w-10 h-8 rounded cursor-pointer bg-transparent"
             />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-1">
             <span className="text-sm text-gray-400">Background Color</span>
             <input
               type="color"
@@ -157,10 +157,10 @@ const Settings: React.FC = () => {
       )}
 
       {/* Opacity */}
-      <section className="space-y-3">
+      <section className="space-y-4">
         <h3 className="text-sm font-medium text-gray-300">Opacity</h3>
         <div>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-400">Background</span>
             <span className="text-sm text-gray-500">{Math.round(settings.backgroundOpacity * 100)}%</span>
           </div>
@@ -175,7 +175,7 @@ const Settings: React.FC = () => {
           />
         </div>
         <div>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-400">Text</span>
             <span className="text-sm text-gray-500">{Math.round(settings.textOpacity * 100)}%</span>
           </div>
@@ -193,20 +193,20 @@ const Settings: React.FC = () => {
 
       {/* Global Shortcut */}
       <section>
-        <h3 className="text-sm font-medium text-gray-300 mb-2">Global Shortcut</h3>
+        <h3 className="text-sm font-medium text-gray-300 mb-3">Global Shortcut</h3>
         <input
           type="text"
           value={settings.globalShortcut}
           onChange={(e) => updateSettings({ globalShortcut: e.target.value })}
           placeholder="e.g., CommandOrControl+Shift+C"
-          className="w-full py-2 px-3 rounded bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:border-blue-500 text-sm"
+          className="w-full py-2.5 px-4 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:border-blue-500 text-sm"
         />
-        <p className="text-xs text-gray-500 mt-1">Toggle window visibility</p>
+        <p className="text-xs text-gray-500 mt-2">Toggle window visibility</p>
       </section>
 
       {/* Launch on Startup */}
-      <section>
-        <label className="flex items-center justify-between cursor-pointer">
+      <section className="pb-2">
+        <label className="flex items-center justify-between cursor-pointer py-1">
           <span className="text-sm font-medium text-gray-300">Launch on Startup</span>
           <input
             type="checkbox"
