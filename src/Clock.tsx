@@ -60,7 +60,7 @@ const Clock = () => {
 
   return (
     <div
-      className="font-black w-fit px-5 py-4 pointer-events-none transition-all duration-200"
+      className="font-black w-fit px-6 py-5 pointer-events-none transition-all duration-200"
       style={{
         backgroundColor: bgColorWithOpacity,
         fontSize,

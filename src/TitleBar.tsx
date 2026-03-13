@@ -21,7 +21,7 @@ async function openSettingsWindow() {
     url: '/',
     title: 'Settings',
     width: 420,
-    height: 660,
+    height: 700,
     x: pos.x + size.width + 16,
     y: pos.y,
     resizable: false,
