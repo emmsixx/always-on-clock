@@ -13,13 +13,18 @@ async function openSettingsWindow() {
     return;
   }
 
+  const mainWin = getCurrentWindow();
+  const pos = await mainWin.innerPosition();
+  const size = await mainWin.innerSize();
+
   const webview = new WebviewWindow('settings', {
     url: '/',
     title: 'Settings',
     width: 380,
     height: 560,
+    x: pos.x + size.width + 12,
+    y: pos.y,
     resizable: false,
-    center: true,
     decorations: false,
     transparent: false,
   });
