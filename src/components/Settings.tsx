@@ -30,12 +30,13 @@ const Settings: React.FC = () => {
     }
   };
 
-  const sectionStyle: React.CSSProperties = { borderBottom: '1px solid #555' };
+  const sectionStyle: React.CSSProperties = { padding: '20px 28px', borderBottom: '2px solid #444' };
+  const lastSectionStyle: React.CSSProperties = { padding: '20px 28px' };
 
   return (
     <div>
       {/* Time Format */}
-      <section className="px-6 py-5" style={sectionStyle}>
+      <section style={sectionStyle}>
         <h3 className="text-sm font-medium text-gray-300 mb-3">Time Format</h3>
         <div className="flex gap-3">
           <button
@@ -62,7 +63,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Show Seconds */}
-      <section className="px-6 py-5" style={sectionStyle}>
+      <section style={sectionStyle}>
         <label className="flex items-center justify-between cursor-pointer">
           <span className="text-sm font-medium text-gray-300">Show Seconds</span>
           <input
@@ -75,7 +76,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Date Format */}
-      <section className="px-6 py-5" style={sectionStyle}>
+      <section style={sectionStyle}>
         <h3 className="text-sm font-medium text-gray-300 mb-3">Date Display</h3>
         <select
           value={settings.dateFormat}
@@ -90,7 +91,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Font Size */}
-      <section className="px-6 py-5" style={sectionStyle}>
+      <section style={sectionStyle}>
         <h3 className="text-sm font-medium text-gray-300 mb-3">Font Size</h3>
         <div className="grid grid-cols-4 gap-2.5">
           {(Object.keys(FONT_SIZES) as FontSize[]).map((size) => (
@@ -110,7 +111,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Theme */}
-      <section className="px-6 py-5" style={sectionStyle}>
+      <section style={sectionStyle}>
         <h3 className="text-sm font-medium text-gray-300 mb-3">Theme</h3>
         <div className="grid grid-cols-2 gap-2.5">
           {THEMES.map((theme) => (
@@ -135,7 +136,7 @@ const Settings: React.FC = () => {
 
       {/* Custom Colors (only when custom theme is selected) */}
       {settings.activeTheme === 'custom' && (
-        <section className="px-6 py-5 space-y-4" style={sectionStyle}>
+        <section className="space-y-4" style={sectionStyle}>
           <h3 className="text-sm font-medium text-gray-300">Custom Colors</h3>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-400">Text Color</span>
@@ -159,7 +160,7 @@ const Settings: React.FC = () => {
       )}
 
       {/* Opacity */}
-      <section className="px-6 py-5 space-y-4" style={sectionStyle}>
+      <section className="space-y-4" style={sectionStyle}>
         <h3 className="text-sm font-medium text-gray-300">Opacity</h3>
         <div>
           <div className="flex items-center justify-between mb-2">
@@ -194,7 +195,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Global Shortcut */}
-      <section className="px-6 py-5" style={sectionStyle}>
+      <section style={sectionStyle}>
         <h3 className="text-sm font-medium text-gray-300 mb-3">Global Shortcut</h3>
         <input
           type="text"
@@ -207,7 +208,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Launch on Startup */}
-      <section className="px-6 py-5">
+      <section style={lastSectionStyle}>
         <label className="flex items-center justify-between cursor-pointer">
           <span className="text-sm font-medium text-gray-300">Launch on Startup</span>
           <input
