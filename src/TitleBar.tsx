@@ -114,7 +114,8 @@ const TitleBar: React.FC = () => {
       ) : onTop ? null : (
         <div
           data-tauri-drag-region
-          className="w-full cursor-move flex flex-row justify-between items-center text-white px-4 py-3 text-lg bg-[#0c0d0f] transition-all"
+          className="w-full cursor-move flex flex-row justify-between items-center text-white text-lg bg-[#0c0d0f] transition-all"
+          style={{ padding: '14px 28px' }}
         >
           <div className="flex flex-row items-center space-x-2.5 pointer-events-none">
             <Clock1 className="w-5 h-5" />

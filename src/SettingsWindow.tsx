@@ -14,7 +14,8 @@ const SettingsWindowContent: React.FC = () => {
     <div className="bg-[#1a1a1a] min-h-screen overflow-y-auto">
       <div
         data-tauri-drag-region
-        className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-[#1a1a1a] cursor-move"
+        className="sticky top-0 z-10 flex items-center justify-between bg-[#1a1a1a] cursor-move"
+        style={{ padding: '18px 28px', borderBottom: '2px solid #444' }}
       >
         <h2 className="text-lg font-semibold text-white pointer-events-none">Settings</h2>
         <button

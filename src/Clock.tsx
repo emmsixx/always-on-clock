@@ -60,10 +60,11 @@ const Clock = () => {
 
   return (
     <div
-      className="font-black w-fit px-6 py-5 pointer-events-none transition-all duration-200"
+      className="font-black w-fit pointer-events-none transition-all duration-200"
       style={{
         backgroundColor: bgColorWithOpacity,
         fontSize,
+        padding: '20px 24px',
       }}
     >
       <span
