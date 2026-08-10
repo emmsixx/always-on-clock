@@ -55,7 +55,7 @@ A lightweight, customizable desktop clock overlay built with Tauri, React, and T
 ## Usage
 
 - **Pin/Unpin** - Click the pin icon in the title bar to toggle always-on-top mode
-- **Settings** - Click the gear icon to open the settings panel
+- **Settings** - Click the gear icon to open the dedicated settings window beside the clock
 - **Drag** - Click and drag the title bar to move the window (when unpinned)
 - **Resize** - Drag window edges to resize (when unpinned)
 - **System Tray** - When pinned, right-click the tray icon for quick actions

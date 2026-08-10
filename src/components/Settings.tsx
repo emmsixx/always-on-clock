@@ -41,6 +41,7 @@ const Settings: React.FC = () => {
         <div className="flex gap-3">
           <button
             onClick={() => handleTimeFormatChange('12h')}
+            aria-pressed={settings.timeFormat === '12h'}
             className={`flex-1 py-2.5 px-4 rounded-lg text-sm transition-colors ${
               settings.timeFormat === '12h'
                 ? 'bg-blue-600 text-white'
@@ -51,6 +52,7 @@ const Settings: React.FC = () => {
           </button>
           <button
             onClick={() => handleTimeFormatChange('24h')}
+            aria-pressed={settings.timeFormat === '24h'}
             className={`flex-1 py-2.5 px-4 rounded-lg text-sm transition-colors ${
               settings.timeFormat === '24h'
                 ? 'bg-blue-600 text-white'
@@ -77,10 +79,12 @@ const Settings: React.FC = () => {
 
       {/* Date Format */}
       <section style={sectionStyle}>
-        <h3 className="text-sm font-medium text-gray-300 mb-3">Date Display</h3>
+        <h3 id="date-display-label" className="text-sm font-medium text-gray-300 mb-3">Date Display</h3>
         <select
+          id="date-format"
           value={settings.dateFormat}
           onChange={(e) => handleDateFormatChange(e.target.value as DateFormat)}
+          aria-labelledby="date-display-label"
           className="w-full py-2.5 px-4 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:border-blue-500"
         >
           <option value="none">Hidden</option>
@@ -98,6 +102,7 @@ const Settings: React.FC = () => {
             <button
               key={size}
               onClick={() => handleFontSizeChange(size)}
+              aria-pressed={settings.fontSize === size}
               className={`py-2.5 px-2 rounded-lg text-xs capitalize transition-colors ${
                 settings.fontSize === size
                   ? 'bg-blue-600 text-white'
@@ -118,6 +123,7 @@ const Settings: React.FC = () => {
             <button
               key={theme.id}
               onClick={() => handleThemeChange(theme.id)}
+              aria-pressed={settings.activeTheme === theme.id}
               className={`py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center gap-2.5 ${
                 settings.activeTheme === theme.id
                   ? 'bg-blue-600 text-white'
@@ -139,8 +145,9 @@ const Settings: React.FC = () => {
         <section className="space-y-4" style={sectionStyle}>
           <h3 className="text-sm font-medium text-gray-300">Custom Colors</h3>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Text Color</span>
+            <label htmlFor="custom-text-color" className="text-sm text-gray-400">Text Color</label>
             <input
+              id="custom-text-color"
               type="color"
               value={settings.textColor}
               onChange={(e) => updateSettings({ textColor: e.target.value })}
@@ -148,8 +155,9 @@ const Settings: React.FC = () => {
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Background Color</span>
+            <label htmlFor="custom-background-color" className="text-sm text-gray-400">Background Color</label>
             <input
+              id="custom-background-color"
               type="color"
               value={settings.backgroundColor}
               onChange={(e) => updateSettings({ backgroundColor: e.target.value })}
@@ -161,13 +169,14 @@ const Settings: React.FC = () => {
 
       {/* Opacity */}
       <section className="space-y-4" style={sectionStyle}>
-        <h3 className="text-sm font-medium text-gray-300">Opacity</h3>
+        <h3 id="opacity-label" className="text-sm font-medium text-gray-300">Opacity</h3>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Background</span>
-            <span className="text-sm text-gray-500">{Math.round(settings.backgroundOpacity * 100)}%</span>
+            <label htmlFor="background-opacity" className="text-sm text-gray-400">Background</label>
+            <span className="text-sm text-gray-400">{Math.round(settings.backgroundOpacity * 100)}%</span>
           </div>
           <input
+            id="background-opacity"
             type="range"
             min="0"
             max="1"
@@ -179,10 +188,11 @@ const Settings: React.FC = () => {
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Text</span>
-            <span className="text-sm text-gray-500">{Math.round(settings.textOpacity * 100)}%</span>
+            <label htmlFor="text-opacity" className="text-sm text-gray-400">Text</label>
+            <span className="text-sm text-gray-400">{Math.round(settings.textOpacity * 100)}%</span>
           </div>
           <input
+            id="text-opacity"
             type="range"
             min="0.1"
             max="1"
@@ -196,15 +206,18 @@ const Settings: React.FC = () => {
 
       {/* Global Shortcut */}
       <section style={sectionStyle}>
-        <h3 className="text-sm font-medium text-gray-300 mb-3">Global Shortcut</h3>
+        <h3 id="global-shortcut-label" className="text-sm font-medium text-gray-300 mb-3">Global Shortcut</h3>
         <input
+          id="global-shortcut"
           type="text"
           value={settings.globalShortcut}
           onChange={(e) => updateSettings({ globalShortcut: e.target.value })}
+          aria-labelledby="global-shortcut-label"
+          aria-describedby="global-shortcut-help"
           placeholder="e.g., CommandOrControl+Shift+C"
           className="w-full py-2.5 px-4 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:outline-none focus:border-blue-500 text-sm"
         />
-        <p className="text-xs text-gray-500 mt-2">Toggle window visibility</p>
+        <p id="global-shortcut-help" className="text-xs text-gray-400 mt-2">Toggle window visibility</p>
       </section>
 
       {/* Launch on Startup */}

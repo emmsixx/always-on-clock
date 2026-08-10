@@ -1,8 +1,8 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the main window and settings window",
-  "windows": ["main", "settings"],
+  "description": "Capability for the main clock window",
+  "windows": ["main"],
   "permissions": [
     "core:default",
     "opener:default",
@@ -18,7 +18,6 @@
     "core:window:allow-hide",
     "core:window:allow-close",
     "core:window:allow-set-focus",
-    "core:window:allow-center",
     "core:webview:allow-create-webview-window",
     "core:app:allow-default-window-icon",
     "positioner:default",
