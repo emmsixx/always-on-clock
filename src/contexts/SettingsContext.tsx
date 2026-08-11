@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Settings, DEFAULT_SETTINGS, THEMES } from '../types/settings';
-import { loadSettings, saveSettings } from '../utils/storage';
+import {
+  getSettingName,
+  getStore,
+  LEGACY_SETTINGS_KEY,
+  loadSettings,
+  saveSettings,
+} from '../utils/storage';
 import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -31,19 +37,62 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadSettings()
-      .then((loaded) => {
-        setSettings(loaded);
+    let disposed = false;
+    let unlisten: (() => void) | null = null;
+    const pendingUpdates: Partial<Settings> = {};
+
+    const initialize = async () => {
+      let loaded = DEFAULT_SETTINGS;
+
+      try {
+        const store = await getStore();
+        const cleanup = await store.onChange<unknown>((key, value) => {
+          if (disposed) return;
+
+          if (key === LEGACY_SETTINGS_KEY && value && typeof value === 'object') {
+            const updates = value as Partial<Settings>;
+            Object.assign(pendingUpdates, updates);
+            setSettings((previous) => ({ ...previous, ...updates }));
+            return;
+          }
+
+          const settingName = getSettingName(key);
+          if (!settingName) return;
+
+          const nextValue = value === undefined ? DEFAULT_SETTINGS[settingName] : value;
+          Object.assign(pendingUpdates, { [settingName]: nextValue });
+          setSettings((previous) => ({ ...previous, [settingName]: nextValue }));
+        });
+
+        if (disposed) {
+          cleanup();
+          return;
+        }
+
+        unlisten = cleanup;
+        loaded = await loadSettings();
+      } catch (err) {
+        console.error('Failed to initialize settings:', err);
+        loaded = await loadSettings();
+      }
+
+      if (!disposed) {
+        setSettings({ ...loaded, ...pendingUpdates });
         setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to load settings:', err);
-        setIsLoading(false);
-      });
+      }
+    };
+
+    void initialize();
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
   }, []);
 
   useEffect(() => {
     if (isLoading) return;
+    if (getCurrentWindow().label !== 'main') return;
 
     const setupAutostart = async () => {
       const enabled = await isEnabled();
@@ -59,6 +108,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   useEffect(() => {
     if (isLoading || !settings.globalShortcut) return;
+    if (getCurrentWindow().label !== 'main') return;
 
     const setupShortcut = async () => {
       try {
@@ -100,10 +150,9 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, []);
 
   const updateSettings = useCallback(async (updates: Partial<Settings>) => {
-    const newSettings = { ...settings, ...updates };
-    setSettings(newSettings);
-    await saveSettings(newSettings);
-  }, [settings]);
+    setSettings((previous) => ({ ...previous, ...updates }));
+    await saveSettings(updates);
+  }, []);
 
   return (
     <SettingsContext.Provider value={{ settings, updateSettings, applyTheme, isLoading }}>
