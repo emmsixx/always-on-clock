@@ -37,7 +37,10 @@ async function createSettingsWindow() {
     const workAreaSize = workArea.size.toLogical(scaleFactor);
     const maxX = workAreaPos.x + Math.max(0, workAreaSize.width - SETTINGS_WINDOW_WIDTH);
     const maxY = workAreaPos.y + Math.max(0, workAreaSize.height - SETTINGS_WINDOW_HEIGHT);
-    x = Math.min(Math.max(x, workAreaPos.x), maxX);
+    const leftX = logicalPos.x - SETTINGS_WINDOW_WIDTH - 16;
+    const rightFits = x >= workAreaPos.x && x <= maxX;
+    const leftFits = leftX >= workAreaPos.x && leftX <= maxX;
+    x = rightFits ? x : leftFits ? leftX : Math.min(Math.max(x, workAreaPos.x), maxX);
     y = Math.min(Math.max(y, workAreaPos.y), maxY);
   }
 
