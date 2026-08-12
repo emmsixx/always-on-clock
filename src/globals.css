@@ -44,7 +44,7 @@
   color-scheme: dark;
   font-family: var(--font-ui);
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -1339,7 +1339,7 @@ textarea {
     padding: 10px 8px 12px;
   }
 
-  .settings-nav-item span:not(.sr-only) {
+  .settings-nav-item .settings-nav-label {
     display: none;
   }
 
@@ -1348,8 +1348,13 @@ textarea {
     padding: 0;
   }
 
-  .settings-status span:last-child {
-    display: none;
+  .settings-status > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .settings-status {

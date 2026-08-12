@@ -117,10 +117,11 @@ const SettingsWindowContent: React.FC = () => {
                   aria-controls={isActive ? `pane-${item.id}` : undefined}
                   tabIndex={isActive ? 0 : -1}
                   className={`settings-nav-item ${isActive ? "is-active" : ""}`.trim()}
+                  aria-label={item.label}
                   onClick={() => setSection(item.id)}
                 >
                   <Icon size={15} strokeWidth={2.1} aria-hidden="true" />
-                  <span>{item.label}</span>
+                  <span className="settings-nav-label">{item.label}</span>
                 </button>
               );
             })}

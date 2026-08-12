@@ -100,7 +100,9 @@ const AppearancePane: React.FC = () => {
               step={0.05}
               describedBy={hintId}
               onChange={(backgroundOpacity) =>
-                void updateSettings({ backgroundOpacity }).catch(() => undefined)
+                void updateSettings({ backgroundOpacity, activeTheme: 'custom' }).catch(
+                  () => undefined,
+                )
               }
             />
             <Slider

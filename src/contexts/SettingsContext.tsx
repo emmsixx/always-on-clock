@@ -6,6 +6,7 @@ import {
   LEGACY_SETTINGS_KEY,
   loadSettings,
   saveSettings,
+  SETTINGS_KEYS,
 } from '../utils/storage';
 import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
@@ -41,6 +42,29 @@ interface SettingsProviderProps {
   children: React.ReactNode;
 }
 
+interface SettingsUpdatedPayload {
+  source: string;
+  updates: Partial<Settings>;
+}
+
+function isSettingsUpdatedPayload(value: unknown): value is SettingsUpdatedPayload {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
+  const payload = value as { source?: unknown; updates?: unknown };
+  if (
+    typeof payload.source !== 'string' ||
+    !payload.updates ||
+    typeof payload.updates !== 'object' ||
+    Array.isArray(payload.updates)
+  ) {
+    return false;
+  }
+
+  return Object.keys(payload.updates).every((key) =>
+    SETTINGS_KEYS.includes(key as keyof Settings),
+  );
+}
+
 export function SettingsProvider({ children }: SettingsProviderProps) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +87,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     let unlistenStore: (() => void) | null = null;
     let unlistenSettingsEvent: (() => void) | null = null;
     const pendingUpdates: Partial<Settings> = {};
+    const currentWindowLabel = getCurrentWindow().label;
 
     const applyUpdates = (updates: Partial<Settings>) => {
       const updateVersion = ++settingsUpdateVersionRef.current;
@@ -79,11 +104,17 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       let loaded = DEFAULT_SETTINGS;
 
       try {
-        const settingsEventCleanup = await listen<Partial<Settings>>(
+        const settingsEventCleanup = await listen<SettingsUpdatedPayload>(
           SETTINGS_UPDATED_EVENT,
           ({ payload }) => {
-            if (disposed || !payload || typeof payload !== 'object') return;
-            applyUpdates(payload);
+            if (
+              disposed ||
+              !isSettingsUpdatedPayload(payload) ||
+              payload.source === currentWindowLabel
+            ) {
+              return;
+            }
+            applyUpdates(payload.updates);
           },
         );
 
@@ -121,7 +152,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         loaded = await loadSettings();
       } catch (err) {
         console.error('Failed to initialize settings:', err);
-        loaded = await loadSettings();
+        loaded = DEFAULT_SETTINGS;
       }
 
       if (!disposed) {
@@ -274,7 +305,10 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     setLastSavedAt(Date.now());
 
     try {
-      await emit(SETTINGS_UPDATED_EVENT, updates);
+      await emit(SETTINGS_UPDATED_EVENT, {
+        source: getCurrentWindow().label,
+        updates,
+      });
     } catch (err) {
       console.warn('Failed to synchronize settings between windows:', err);
     }

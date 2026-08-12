@@ -65,10 +65,12 @@ async function createSettingsWindow() {
     let settled = false;
     let unlistenCreated: (() => void) | undefined;
     let unlistenError: (() => void) | undefined;
+    let timeoutId: number | undefined;
 
     const cleanup = () => {
       unlistenCreated?.();
       unlistenError?.();
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
 
     const settle = (callback: () => void) => {
@@ -78,6 +80,10 @@ async function createSettingsWindow() {
       callback();
     };
     const fail = (error: unknown) => settle(() => reject(error));
+    timeoutId = window.setTimeout(
+      () => fail(new Error('Timed out waiting for the settings window to be created')),
+      10_000,
+    );
 
     void webview
       .once('tauri://created', () => settle(resolve))
@@ -179,16 +185,33 @@ const TitleBar: React.FC = () => {
   };
 
   const setTop = async (value: boolean) => {
-    if (!trayRef.current) {
-      await createMenu();
-    }
-
-    setOnTop(value);
+    const previousValue = onTop ?? false;
     const currentWindow = getCurrentWindow();
-    await currentWindow.setAlwaysOnTop(value);
-    await currentWindow.setResizable(!value);
-    await trayRef.current?.setVisible(value);
-    await currentWindow.setIgnoreCursorEvents(value);
+
+    try {
+      if (!trayRef.current) {
+        await createMenu();
+      }
+
+      await currentWindow.setAlwaysOnTop(value);
+      await currentWindow.setResizable(!value);
+      await trayRef.current?.setVisible(value);
+      await currentWindow.setIgnoreCursorEvents(value);
+      setOnTop(value);
+    } catch (error) {
+      console.error('Failed to change the always-on-top state:', error);
+
+      try {
+        await currentWindow.setAlwaysOnTop(previousValue);
+        await currentWindow.setResizable(!previousValue);
+        await trayRef.current?.setVisible(previousValue);
+        await currentWindow.setIgnoreCursorEvents(previousValue);
+      } catch (rollbackError) {
+        console.error('Failed to restore the previous window state:', rollbackError);
+      }
+
+      setOnTop(previousValue);
+    }
   };
 
   if (onTop === null || onTop) return null;

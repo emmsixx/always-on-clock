@@ -27,6 +27,19 @@ const AboutPane: React.FC = () => {
     wasConfirmingReset.current = confirmingReset;
   }, [confirmingReset]);
 
+  useEffect(() => {
+    if (!confirmingReset) return undefined;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setConfirmingReset(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [confirmingReset]);
+
   const open = async (href: string) => {
     try {
       setLinkError(null);
