@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Keyboard, RotateCcw, X } from 'lucide-react';
 
 interface ShortcutRecorderProps {
   value: string;
   defaultValue: string;
-  onChange: (value: string) => void;
+  onChange: (value: string) => void | Promise<void>;
+  describedBy?: string;
 }
 
 const MODIFIER_ORDER = ['CommandOrControl', 'Alt', 'Shift'];
@@ -105,17 +106,42 @@ function hasModifier(tokens: string[]): boolean {
   return tokens.some((token) => MODIFIER_ORDER.includes(token));
 }
 
-const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue, onChange }) => {
+const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({
+  value,
+  defaultValue,
+  onChange,
+  describedBy,
+}) => {
   const controlRef = useRef<HTMLButtonElement>(null);
   const onChangeRef = useRef(onChange);
   const pressedCodesRef = useRef(new Set<string>());
+  const saveAttemptRef = useRef(0);
   const [isRecording, setIsRecording] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
-  const [feedback, setFeedback] = useState('Click to record a new shortcut.');
+  const [feedback, setFeedback] = useState('Press the keys you want to use.');
 
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  const applyShortcut = useCallback((shortcut: string) => {
+    const saveAttempt = ++saveAttemptRef.current;
+    setFeedback('Saving…');
+    void Promise.resolve()
+      .then(() => onChangeRef.current(shortcut))
+      .then(
+        () => {
+          if (saveAttempt === saveAttemptRef.current) {
+            setFeedback('Saved. This shortcut now toggles the clock.');
+          }
+        },
+        () => {
+          if (saveAttempt === saveAttemptRef.current) {
+            setFeedback('Could not save. The previous shortcut is still active.');
+          }
+        },
+      );
+  }, []);
 
   useEffect(() => {
     if (!isRecording) return undefined;
@@ -128,10 +154,11 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       if (event.key === 'Escape' || code === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
+        saveAttemptRef.current += 1;
         pressedCodesRef.current.clear();
         setPressedKeys([]);
         setIsRecording(false);
-        setFeedback('Recording cancelled.');
+        setFeedback('Cancelled. The previous shortcut is still active.');
         return;
       }
 
@@ -148,13 +175,12 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       const pressedPrimaryKey = pressedToken !== null && !MODIFIER_ORDER.includes(pressedToken);
 
       if (pressedPrimaryKey && parts.length > 1 && hasModifier(parts)) {
-        onChangeRef.current(parts.join('+'));
         pressedCodesRef.current.clear();
         setPressedKeys([]);
         setIsRecording(false);
-        setFeedback('Shortcut saved. Click to record again.');
+        applyShortcut(parts.join('+'));
       } else if (parts.some((part) => !MODIFIER_ORDER.includes(part))) {
-        setFeedback('Add Ctrl / ⌘, Alt, or Shift before the key.');
+        setFeedback('That key needs a modifier. Hold Ctrl / ⌘, Alt, or Shift first.');
       }
     };
 
@@ -171,21 +197,23 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
     };
-  }, [isRecording]);
+  }, [applyShortcut, isRecording]);
 
   const startRecording = () => {
+    saveAttemptRef.current += 1;
     pressedCodesRef.current.clear();
     setPressedKeys([]);
-    setFeedback('Press Ctrl / ⌘, Alt, or Shift plus another key.');
+    setFeedback('Hold Ctrl / ⌘, Alt, or Shift, then press a key. Esc cancels.');
     setIsRecording(true);
     controlRef.current?.focus();
   };
 
   const cancelRecording = () => {
+    saveAttemptRef.current += 1;
     pressedCodesRef.current.clear();
     setPressedKeys([]);
     setIsRecording(false);
-    setFeedback('Recording cancelled.');
+    setFeedback('Cancelled. The previous shortcut is still active.');
     controlRef.current?.focus();
   };
 
@@ -193,56 +221,57 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
   const isDefault = value === defaultValue;
 
   return (
-    <div className={`shortcut-recorder ${isRecording ? 'is-recording' : ''}`}>
-      <div className="shortcut-recorder-row">
+    <div className={`recorder ${isRecording ? 'is-recording' : ''}`.trim()}>
+      <div className="recorder-row">
         <button
           ref={controlRef}
           id="global-shortcut"
           type="button"
-          className="shortcut-recorder-control"
+          className="recorder-control"
           onClick={startRecording}
-          aria-labelledby="global-shortcut-label"
-          aria-describedby="global-shortcut-help global-shortcut-status"
+          aria-describedby={describedBy ? `${describedBy} global-shortcut-status` : 'global-shortcut-status'}
           aria-pressed={isRecording}
         >
-          <Keyboard size={16} strokeWidth={2} className="shortcut-recorder-icon" aria-hidden="true" />
-          <span className="shortcut-recorder-keys">
+          <span className="sr-only">Global shortcut: </span>
+          <Keyboard size={15} strokeWidth={2} className="recorder-icon" aria-hidden="true" />
+          <span className="recorder-keys">
             {tokens.length > 0 ? (
-              tokens.map((token) => <kbd key={token}>{displayKey(token)}</kbd>)
+              tokens.map((token, index) => (
+                <React.Fragment key={token}>
+                  {index > 0 && <span className="recorder-plus" aria-hidden="true">+</span>}
+                  <kbd>{displayKey(token)}</kbd>
+                </React.Fragment>
+              ))
             ) : (
-              <span className="shortcut-recorder-placeholder">
-                {isRecording ? 'Press a shortcut…' : 'Not set'}
+              <span className="recorder-placeholder">
+                {isRecording ? 'Waiting for keys…' : 'No shortcut set'}
               </span>
             )}
           </span>
-          <span className={`shortcut-recorder-action ${isRecording ? 'is-live' : ''}`}>
-            {isRecording ? 'Listening' : 'Click to change'}
+          <span className={`recorder-action ${isRecording ? 'is-live' : ''}`.trim()}>
+            {isRecording ? 'Listening' : 'Change'}
           </span>
         </button>
         {isRecording && (
           <button
             type="button"
-            className="shortcut-recorder-cancel"
+            className="icon-button"
             onClick={cancelRecording}
             aria-label="Cancel shortcut recording"
-            title="Cancel recording"
+            title="Cancel recording (Esc)"
           >
-            <X size={15} strokeWidth={2.2} aria-hidden="true" />
+            <X size={14} strokeWidth={2.2} aria-hidden="true" />
           </button>
         )}
       </div>
-      <div className="shortcut-recorder-footer">
-        <span id="global-shortcut-status" className="shortcut-recorder-status" role="status" aria-live="polite">
+      <div className="recorder-footer">
+        <span id="global-shortcut-status" className="recorder-status" role="status" aria-live="polite">
           {feedback}
         </span>
         {!isDefault && !isRecording && (
-          <button
-            type="button"
-            className="shortcut-recorder-reset"
-            onClick={() => onChange(defaultValue)}
-          >
-            <RotateCcw size={12} strokeWidth={2.3} aria-hidden="true" />
-            Reset
+          <button type="button" className="button button--link" onClick={() => applyShortcut(defaultValue)}>
+            <RotateCcw size={11} strokeWidth={2.4} aria-hidden="true" />
+            Reset to default
           </button>
         )}
       </div>
