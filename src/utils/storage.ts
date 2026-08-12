@@ -49,6 +49,7 @@ export async function saveSettings(updates: Partial<Settings>): Promise<void> {
     await s.save();
   } catch (err) {
     console.error('Failed to save settings:', err);
+    throw err;
   }
 }
 

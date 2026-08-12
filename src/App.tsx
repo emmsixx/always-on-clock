@@ -36,21 +36,24 @@ const AppContent: React.FC = () => {
     if (isLoading) return;
 
     const win = getCurrentWindow();
-    let saveTimeout: number | null = null;
+    let moveTimeout: number | null = null;
+    let resizeTimeout: number | null = null;
 
     const handleMove = async () => {
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = window.setTimeout(async () => {
+      if (moveTimeout) clearTimeout(moveTimeout);
+      moveTimeout = window.setTimeout(async () => {
         const pos = await win.innerPosition();
-        updateSettings({ windowPosition: { x: pos.x, y: pos.y } });
+        void updateSettings({ windowPosition: { x: pos.x, y: pos.y } }).catch(() => undefined);
       }, 500);
     };
 
     const handleResize = async () => {
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = window.setTimeout(async () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(async () => {
         const size = await win.innerSize();
-        updateSettings({ windowSize: { width: size.width, height: size.height } });
+        void updateSettings({
+          windowSize: { width: size.width, height: size.height },
+        }).catch(() => undefined);
       }, 500);
     };
 
@@ -58,17 +61,20 @@ const AppContent: React.FC = () => {
     const unlistenResize = win.onResized(handleResize);
 
     return () => {
-      if (saveTimeout) clearTimeout(saveTimeout);
+      if (moveTimeout) clearTimeout(moveTimeout);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
       unlistenMove.then((fn) => fn());
       unlistenResize.then((fn) => fn());
     };
   }, [isLoading, updateSettings]);
 
+  // The shell hugs its content so the chrome chip lines up with the clock's own edges rather
+  // than stretching across a transparent window.
   return (
-    <>
+    <div className="overlay-shell">
       <TitleBar />
       <Clock />
-    </>
+    </div>
   );
 };
 
