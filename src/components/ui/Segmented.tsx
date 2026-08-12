@@ -12,6 +12,7 @@ interface SegmentedProps<T extends string> {
   options: SegmentedOption<T>[];
   onChange: (value: T) => void;
   label: string;
+  describedBy?: string;
 }
 
 /**
@@ -19,7 +20,13 @@ interface SegmentedProps<T extends string> {
  * authored motion in the settings window. Arrow keys move the selection, as a native radio
  * group does.
  */
-function Segmented<T extends string>({ value, options, onChange, label }: SegmentedProps<T>) {
+function Segmented<T extends string>({
+  value,
+  options,
+  onChange,
+  label,
+  describedBy,
+}: SegmentedProps<T>) {
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const activeIndex = Math.max(0, options.findIndex((option) => option.value === value));
 
@@ -44,6 +51,7 @@ function Segmented<T extends string>({ value, options, onChange, label }: Segmen
       className="segmented"
       role="radiogroup"
       aria-label={label}
+      aria-describedby={describedBy}
       onKeyDown={handleKeyDown}
       style={
         {

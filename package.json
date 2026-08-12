@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "A lightweight, customizable desktop clock overlay that stays always-on-top",
   "type": "module",
+  "packageManager": "pnpm@10.26.0",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
@@ -33,9 +34,6 @@
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": ["esbuild"]
   },
   "devDependencies": {
     "@tailwindcss/postcss7-compat": "^2.2.17",

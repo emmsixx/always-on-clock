@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Keyboard, RotateCcw, X } from 'lucide-react';
 
 interface ShortcutRecorderProps {
   value: string;
   defaultValue: string;
   onChange: (value: string) => void | Promise<void>;
+  describedBy?: string;
 }
 
 const MODIFIER_ORDER = ['CommandOrControl', 'Alt', 'Shift'];
@@ -105,7 +106,12 @@ function hasModifier(tokens: string[]): boolean {
   return tokens.some((token) => MODIFIER_ORDER.includes(token));
 }
 
-const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue, onChange }) => {
+const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({
+  value,
+  defaultValue,
+  onChange,
+  describedBy,
+}) => {
   const controlRef = useRef<HTMLButtonElement>(null);
   const onChangeRef = useRef(onChange);
   const pressedCodesRef = useRef(new Set<string>());
@@ -117,6 +123,25 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  const applyShortcut = useCallback((shortcut: string) => {
+    const saveAttempt = ++saveAttemptRef.current;
+    setFeedback('Saving…');
+    void Promise.resolve()
+      .then(() => onChangeRef.current(shortcut))
+      .then(
+        () => {
+          if (saveAttempt === saveAttemptRef.current) {
+            setFeedback('Saved. This shortcut now toggles the clock.');
+          }
+        },
+        () => {
+          if (saveAttempt === saveAttemptRef.current) {
+            setFeedback('Could not save. The previous shortcut is still active.');
+          }
+        },
+      );
+  }, []);
 
   useEffect(() => {
     if (!isRecording) return undefined;
@@ -150,26 +175,10 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       const pressedPrimaryKey = pressedToken !== null && !MODIFIER_ORDER.includes(pressedToken);
 
       if (pressedPrimaryKey && parts.length > 1 && hasModifier(parts)) {
-        const shortcut = parts.join('+');
-        const saveAttempt = ++saveAttemptRef.current;
         pressedCodesRef.current.clear();
         setPressedKeys([]);
         setIsRecording(false);
-        setFeedback('Saving…');
-        void Promise.resolve()
-          .then(() => onChangeRef.current(shortcut))
-          .then(
-            () => {
-              if (saveAttempt === saveAttemptRef.current) {
-                setFeedback('Saved. This shortcut now toggles the clock.');
-              }
-            },
-            () => {
-              if (saveAttempt === saveAttemptRef.current) {
-                setFeedback('Could not save. The previous shortcut is still active.');
-              }
-            },
-          );
+        applyShortcut(parts.join('+'));
       } else if (parts.some((part) => !MODIFIER_ORDER.includes(part))) {
         setFeedback('That key needs a modifier. Hold Ctrl / ⌘, Alt, or Shift first.');
       }
@@ -188,7 +197,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
     };
-  }, [isRecording]);
+  }, [applyShortcut, isRecording]);
 
   const startRecording = () => {
     saveAttemptRef.current += 1;
@@ -220,7 +229,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
           type="button"
           className="recorder-control"
           onClick={startRecording}
-          aria-describedby="global-shortcut-status"
+          aria-describedby={describedBy ? `${describedBy} global-shortcut-status` : 'global-shortcut-status'}
           aria-pressed={isRecording}
         >
           <span className="sr-only">Global shortcut: </span>
@@ -260,7 +269,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
           {feedback}
         </span>
         {!isDefault && !isRecording && (
-          <button type="button" className="button button--link" onClick={() => onChange(defaultValue)}>
+          <button type="button" className="button button--link" onClick={() => applyShortcut(defaultValue)}>
             <RotateCcw size={11} strokeWidth={2.4} aria-hidden="true" />
             Reset to default
           </button>

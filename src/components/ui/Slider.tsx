@@ -8,6 +8,7 @@ interface SliderProps {
   max: number;
   step: number;
   onChange: (value: number) => void;
+  describedBy?: string;
   /** Formats the value for display; defaults to a percentage of the min–max span. */
   format?: (value: number) => string;
 }
@@ -20,6 +21,7 @@ const Slider: React.FC<SliderProps> = ({
   max,
   step,
   onChange,
+  describedBy,
   format = (raw) => `${Math.round(((raw - min) / (max - min)) * 100)}%`,
 }) => {
   const progress = ((value - min) / (max - min)) * 100;
@@ -42,6 +44,7 @@ const Slider: React.FC<SliderProps> = ({
         max={max}
         step={step}
         value={value}
+        aria-describedby={describedBy}
         onChange={(event) => onChange(parseFloat(event.target.value))}
         style={{ '--slider-progress': `${progress}%` } as React.CSSProperties}
       />

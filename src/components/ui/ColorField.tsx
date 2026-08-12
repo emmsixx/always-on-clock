@@ -5,6 +5,7 @@ interface ColorFieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  describedBy?: string;
 }
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -13,11 +14,11 @@ const HEX = /^#[0-9a-f]{6}$/i;
  * Swatch plus an editable hex field. The text input keeps its own draft so a partially typed
  * value never reaches settings; it commits on a valid hex and reverts on blur if left invalid.
  */
-const ColorField: React.FC<ColorFieldProps> = ({ id, label, value, onChange }) => {
+const ColorField: React.FC<ColorFieldProps> = ({ id, label, value, onChange, describedBy }) => {
   const [draft, setDraft] = useState(value);
 
   useEffect(() => {
-    setDraft(value);
+    setDraft((current) => (current.toLowerCase() === value.toLowerCase() ? current : value));
   }, [value]);
 
   const handleTextChange = (next: string) => {
@@ -40,6 +41,7 @@ const ColorField: React.FC<ColorFieldProps> = ({ id, label, value, onChange }) =
           value={draft}
           spellCheck={false}
           maxLength={7}
+          aria-describedby={describedBy}
           aria-label={`${label} hex value`}
           onChange={(event) => handleTextChange(event.target.value)}
           onBlur={() => setDraft(value)}
@@ -52,6 +54,7 @@ const ColorField: React.FC<ColorFieldProps> = ({ id, label, value, onChange }) =
             value={HEX.test(value) ? value : '#000000'}
             onChange={(event) => onChange(event.target.value)}
             aria-label={label}
+            aria-describedby={describedBy}
           />
         </span>
       </div>

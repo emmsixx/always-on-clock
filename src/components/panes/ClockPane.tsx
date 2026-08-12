@@ -24,15 +24,18 @@ const ClockPane: React.FC = () => {
   return (
     <Group>
       <Field label="Time format" hint="Match the clock you already read everywhere else.">
-        <Segmented<TimeFormat>
-          label="Time format"
-          value={settings.timeFormat}
-          onChange={(timeFormat) => void updateSettings({ timeFormat }).catch(() => undefined)}
-          options={[
-            { value: '12h', label: '12-hour', sample: '2:45 PM' },
-            { value: '24h', label: '24-hour', sample: '14:45' },
-          ]}
-        />
+        {(hintId) => (
+          <Segmented<TimeFormat>
+            label="Time format"
+            value={settings.timeFormat}
+            describedBy={hintId}
+            onChange={(timeFormat) => void updateSettings({ timeFormat }).catch(() => undefined)}
+            options={[
+              { value: '12h', label: '12-hour', sample: '2:45 PM' },
+              { value: '24h', label: '24-hour', sample: '14:45' },
+            ]}
+          />
+        )}
       </Field>
 
       <ToggleField
@@ -47,12 +50,15 @@ const ClockPane: React.FC = () => {
         hint="Sits beneath the time in a smaller weight."
         htmlFor="date-format"
       >
-        <Select<DateFormat>
-          id="date-format"
-          value={settings.dateFormat}
-          options={dateOptions}
-          onChange={(dateFormat) => void updateSettings({ dateFormat }).catch(() => undefined)}
-        />
+        {(hintId) => (
+          <Select<DateFormat>
+            id="date-format"
+            value={settings.dateFormat}
+            describedBy={hintId}
+            options={dateOptions}
+            onChange={(dateFormat) => void updateSettings({ dateFormat }).catch(() => undefined)}
+          />
+        )}
       </Field>
     </Group>
   );

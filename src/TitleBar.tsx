@@ -62,8 +62,37 @@ async function createSettingsWindow() {
   });
 
   await new Promise<void>((resolve, reject) => {
-    void webview.once('tauri://created', () => resolve()).catch(reject);
-    void webview.once('tauri://error', (event) => reject(event.payload)).catch(reject);
+    let settled = false;
+    let unlistenCreated: (() => void) | undefined;
+    let unlistenError: (() => void) | undefined;
+
+    const cleanup = () => {
+      unlistenCreated?.();
+      unlistenError?.();
+    };
+
+    const settle = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback();
+    };
+    const fail = (error: unknown) => settle(() => reject(error));
+
+    void webview
+      .once('tauri://created', () => settle(resolve))
+      .then((unlisten) => {
+        unlistenCreated = unlisten;
+        if (settled) unlisten();
+      })
+      .catch(fail);
+    void webview
+      .once('tauri://error', (event) => settle(() => reject(event.payload)))
+      .then((unlisten) => {
+        unlistenError = unlisten;
+        if (settled) unlisten();
+      })
+      .catch(fail);
   });
 }
 

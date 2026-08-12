@@ -36,19 +36,20 @@ const AppContent: React.FC = () => {
     if (isLoading) return;
 
     const win = getCurrentWindow();
-    let saveTimeout: number | null = null;
+    let moveTimeout: number | null = null;
+    let resizeTimeout: number | null = null;
 
     const handleMove = async () => {
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = window.setTimeout(async () => {
+      if (moveTimeout) clearTimeout(moveTimeout);
+      moveTimeout = window.setTimeout(async () => {
         const pos = await win.innerPosition();
         void updateSettings({ windowPosition: { x: pos.x, y: pos.y } }).catch(() => undefined);
       }, 500);
     };
 
     const handleResize = async () => {
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = window.setTimeout(async () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(async () => {
         const size = await win.innerSize();
         void updateSettings({
           windowSize: { width: size.width, height: size.height },
@@ -60,7 +61,8 @@ const AppContent: React.FC = () => {
     const unlistenResize = win.onResized(handleResize);
 
     return () => {
-      if (saveTimeout) clearTimeout(saveTimeout);
+      if (moveTimeout) clearTimeout(moveTimeout);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
       unlistenMove.then((fn) => fn());
       unlistenResize.then((fn) => fn());
     };

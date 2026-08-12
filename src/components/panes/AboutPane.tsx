@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, RotateCcw } from 'lucide-react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -14,6 +14,18 @@ const AboutPane: React.FC = () => {
   const { resetSettings } = useSettings();
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [linkError, setLinkError] = useState<string | null>(null);
+  const restoreButtonRef = useRef<HTMLButtonElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const wasConfirmingReset = useRef(false);
+
+  useEffect(() => {
+    if (confirmingReset) {
+      cancelButtonRef.current?.focus();
+    } else if (wasConfirmingReset.current) {
+      restoreButtonRef.current?.focus();
+    }
+    wasConfirmingReset.current = confirmingReset;
+  }, [confirmingReset]);
 
   const open = async (href: string) => {
     try {
@@ -65,6 +77,7 @@ const AboutPane: React.FC = () => {
         {confirmingReset ? (
           <div className="confirm">
             <button
+              ref={cancelButtonRef}
               type="button"
               className="button button--ghost"
               onClick={() => setConfirmingReset(false)}
@@ -84,6 +97,7 @@ const AboutPane: React.FC = () => {
           </div>
         ) : (
           <button
+            ref={restoreButtonRef}
             type="button"
             className="button button--ghost"
             onClick={() => setConfirmingReset(true)}

@@ -4,10 +4,11 @@ type TimeOptions = Pick<Settings, 'timeFormat' | 'showSeconds'>;
 type DateOptions = Pick<Settings, 'dateFormat'>;
 
 export function formatTime(now: Date, { timeFormat, showSeconds }: TimeOptions): string {
+  const hour12 = timeFormat === '12h';
   const options: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',
+    hour: hour12 ? 'numeric' : '2-digit',
     minute: '2-digit',
-    hour12: timeFormat === '12h',
+    hour12,
   };
 
   if (showSeconds) {

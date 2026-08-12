@@ -10,6 +10,7 @@ interface ThemePickerProps {
   customBackgroundColor: string;
   customBackgroundOpacity: number;
   onSelect: (themeId: string) => void;
+  describedBy?: string;
 }
 
 /**
@@ -22,6 +23,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({
   customBackgroundColor,
   customBackgroundOpacity,
   onSelect,
+  describedBy,
 }) => {
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const activeIndex = Math.max(0, THEMES.findIndex((theme) => theme.id === activeTheme));
@@ -43,7 +45,13 @@ const ThemePicker: React.FC<ThemePickerProps> = ({
   };
 
   return (
-    <div className="theme-grid" role="radiogroup" aria-label="Theme" onKeyDown={handleKeyDown}>
+    <div
+      className="theme-grid"
+      role="radiogroup"
+      aria-label="Theme"
+      aria-describedby={describedBy}
+      onKeyDown={handleKeyDown}
+    >
       {THEMES.map((theme, index) => {
         const isCustom = theme.id === 'custom';
         const textColor = isCustom ? customTextColor : theme.textColor;
@@ -64,7 +72,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({
             className={`theme-tile ${isSelected ? 'is-selected' : ''}`.trim()}
             onClick={() => onSelect(theme.id)}
           >
-            <span className="theme-tile-stage">
+            <span className="theme-tile-stage" aria-hidden="true">
               <span className="theme-tile-ramp" aria-hidden="true" />
               <span
                 className="theme-tile-sample"

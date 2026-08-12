@@ -14,11 +14,14 @@ const BehaviorPane: React.FC = () => {
         label="Global shortcut"
         hint="Shows and hides the clock from any application."
       >
-        <ShortcutRecorder
-          value={settings.globalShortcut}
-          defaultValue={DEFAULT_SETTINGS.globalShortcut}
-          onChange={(globalShortcut) => updateSettings({ globalShortcut })}
-        />
+        {(hintId) => (
+          <ShortcutRecorder
+            value={settings.globalShortcut}
+            defaultValue={DEFAULT_SETTINGS.globalShortcut}
+            describedBy={hintId}
+            onChange={(globalShortcut) => updateSettings({ globalShortcut })}
+          />
+        )}
       </Field>
 
       <ToggleField
