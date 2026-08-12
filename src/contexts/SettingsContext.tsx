@@ -38,8 +38,13 @@ interface SettingsProviderProps {
 export function SettingsProvider({ children }: SettingsProviderProps) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const settingsRef = useRef(settings);
   const registeredShortcutRef = useRef<string | null>(null);
   const shortcutOperationRef = useRef<Promise<void>>(Promise.resolve());
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   useEffect(() => {
     let disposed = false;
@@ -225,8 +230,19 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, []);
 
   const updateSettings = useCallback(async (updates: Partial<Settings>) => {
-    setSettings((previous) => ({ ...previous, ...updates }));
-    await saveSettings(updates);
+    const previousSettings = settingsRef.current;
+    const nextSettings = { ...previousSettings, ...updates };
+    settingsRef.current = nextSettings;
+    setSettings(nextSettings);
+
+    try {
+      await saveSettings(updates);
+    } catch (err) {
+      settingsRef.current = previousSettings;
+      setSettings(previousSettings);
+      throw err;
+    }
+
     try {
       await emit(SETTINGS_UPDATED_EVENT, updates);
     } catch (err) {
