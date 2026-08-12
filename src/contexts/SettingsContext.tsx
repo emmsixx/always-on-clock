@@ -120,9 +120,12 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
       const previousShortcut = registeredShortcutRef.current;
       if (previousShortcut) {
-        await unregister(previousShortcut).catch((err) => {
+        try {
+          await unregister(previousShortcut);
+        } catch (err) {
           console.warn('Failed to unregister previous shortcut:', err);
-        });
+          return;
+        }
         registeredShortcutRef.current = null;
       }
 
@@ -163,13 +166,22 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   useEffect(() => {
     return () => {
-      const shortcut = registeredShortcutRef.current;
-      registeredShortcutRef.current = null;
-      if (shortcut) {
-        unregister(shortcut).catch((err) => {
+      const previousOperation = shortcutOperationRef.current;
+      const shutdownOperation = (async () => {
+        await previousOperation.catch(() => undefined);
+
+        const shortcut = registeredShortcutRef.current;
+        if (!shortcut) return;
+
+        try {
+          await unregister(shortcut);
+          registeredShortcutRef.current = null;
+        } catch (err) {
           console.warn('Failed to unregister shortcut on shutdown:', err);
-        });
-      }
+        }
+      })();
+
+      shortcutOperationRef.current = shutdownOperation;
     };
   }, []);
 

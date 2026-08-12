@@ -144,7 +144,10 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       const parts = buildShortcutParts(pressedCodesRef.current);
       setPressedKeys(parts);
 
-      if (parts.length > 1 && hasModifier(parts)) {
+      const pressedToken = keyTokenForCode(code);
+      const pressedPrimaryKey = pressedToken !== null && !MODIFIER_ORDER.includes(pressedToken);
+
+      if (pressedPrimaryKey && parts.length > 1 && hasModifier(parts)) {
         onChangeRef.current(parts.join('+'));
         pressedCodesRef.current.clear();
         setPressedKeys([]);
