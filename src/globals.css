@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #f8fafc;
   font-synthesis: none;
   text-rendering: optimizelegibility;
@@ -61,7 +61,7 @@ select:focus-visible {
   color: var(--text);
   background:
     radial-gradient(circle at 86% -6%, rgba(91, 141, 239, 0.14), transparent 35%),
-    linear-gradient(180deg, var(--page-raised) 0%, var(--page) 38%, var(--page) 100%);
+    var(--page);
   scrollbar-color: #3a424d transparent;
   scrollbar-width: thin;
 }
@@ -190,8 +190,8 @@ select:focus-visible {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: linear-gradient(145deg, rgba(32, 37, 42, 0.92), rgba(24, 28, 32, 0.98));
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  background: var(--card);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .settings-card-header {
@@ -200,6 +200,7 @@ select:focus-visible {
   gap: 11px;
   padding: 17px 18px 15px;
   border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.012);
 }
 
 .settings-card-icon {
@@ -338,7 +339,7 @@ select:focus-visible {
 .segmented-option.is-selected {
   border-color: rgba(120, 167, 255, 0.26);
   color: #fff;
-  background: linear-gradient(135deg, #5b8def, #4774d8);
+  background: var(--accent);
   box-shadow: 0 4px 12px rgba(51, 102, 218, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
@@ -461,7 +462,7 @@ select:focus-visible {
 .theme-option.is-selected {
   border-color: rgba(120, 167, 255, 0.55);
   color: #fff;
-  background: linear-gradient(135deg, rgba(91, 141, 239, 0.98), rgba(71, 116, 216, 0.98));
+  background: var(--accent);
   box-shadow: 0 5px 15px rgba(42, 86, 181, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
@@ -481,11 +482,9 @@ select:focus-visible {
 .settings-subpanel {
   display: grid;
   gap: 12px;
-  margin: 17px 0 0;
-  padding: 13px;
-  border: 1px solid rgba(120, 167, 255, 0.16);
-  border-radius: 10px;
-  background: rgba(91, 141, 239, 0.06);
+  margin: 17px 0 0 2px;
+  padding: 2px 0 2px 13px;
+  border-left: 2px solid rgba(120, 167, 255, 0.38);
 }
 
 .settings-subpanel-heading {
@@ -543,6 +542,7 @@ select:focus-visible {
   height: 5px;
   appearance: none;
   border-radius: 999px;
+  accent-color: var(--accent-bright);
   cursor: pointer;
 }
 
