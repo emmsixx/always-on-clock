@@ -12,7 +12,8 @@ import {
   Type,
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
-import { THEMES, FONT_SIZES, TimeFormat, DateFormat, FontSize } from '../types/settings';
+import { DEFAULT_SETTINGS, THEMES, FONT_SIZES, TimeFormat, DateFormat, FontSize } from '../types/settings';
+import ShortcutRecorder from './ShortcutRecorder';
 
 const SettingCard: React.FC<{
   icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
@@ -300,23 +301,18 @@ const Settings: React.FC = () => {
         <div className="settings-field settings-field--stacked">
           <div className="settings-field-heading">
             <div className="settings-field-copy">
-              <label htmlFor="global-shortcut" className="settings-label">Global shortcut</label>
-              <span className="settings-help">Use this shortcut to toggle window visibility.</span>
+              <span id="global-shortcut-label" className="settings-label">Global shortcut</span>
+              <span id="global-shortcut-help" className="settings-help">
+                Click the field, then press the keys you want to use.
+              </span>
             </div>
             <Keyboard size={15} className="settings-muted-icon" aria-hidden="true" />
           </div>
-          <div className="settings-input-wrap">
-            <Keyboard size={15} className="settings-input-icon" aria-hidden="true" />
-            <input
-              id="global-shortcut"
-              type="text"
-              value={settings.globalShortcut}
-              onChange={(e) => updateSettings({ globalShortcut: e.target.value })}
-              aria-label="Global shortcut"
-              placeholder="CommandOrControl+Shift+C"
-              className="settings-text-input"
-            />
-          </div>
+          <ShortcutRecorder
+            value={settings.globalShortcut}
+            defaultValue={DEFAULT_SETTINGS.globalShortcut}
+            onChange={(globalShortcut) => updateSettings({ globalShortcut })}
+          />
         </div>
 
         <label className="settings-field settings-field--interactive">

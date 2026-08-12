@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Settings, DEFAULT_SETTINGS, THEMES } from '../types/settings';
 import {
   getSettingName,
@@ -35,6 +35,8 @@ interface SettingsProviderProps {
 export function SettingsProvider({ children }: SettingsProviderProps) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const registeredShortcutRef = useRef<string | null>(null);
+  const shortcutOperationRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
     let disposed = false;
@@ -107,12 +109,29 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, [settings.launchOnStartup, isLoading]);
 
   useEffect(() => {
-    if (isLoading || !settings.globalShortcut) return;
-    if (getCurrentWindow().label !== 'main') return;
+    if (isLoading || getCurrentWindow().label !== 'main') return undefined;
 
-    const setupShortcut = async () => {
+    const shortcut = settings.globalShortcut.trim();
+    let cancelled = false;
+    const previousOperation = shortcutOperationRef.current;
+
+    const reconcileShortcut = async () => {
+      await previousOperation.catch(() => undefined);
+
+      const previousShortcut = registeredShortcutRef.current;
+      if (previousShortcut) {
+        await unregister(previousShortcut).catch((err) => {
+          console.warn('Failed to unregister previous shortcut:', err);
+        });
+        registeredShortcutRef.current = null;
+      }
+
+      if (cancelled || !shortcut) return;
+
       try {
-        await register(settings.globalShortcut, async () => {
+        await register(shortcut, async (event) => {
+          if (event.state !== 'Pressed') return;
+
           const win = getCurrentWindow();
           const visible = await win.isVisible();
           if (visible) {
@@ -122,17 +141,37 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
             await win.setFocus();
           }
         });
+
+        if (cancelled) {
+          await unregister(shortcut).catch((err) => {
+            console.warn('Failed to clean up shortcut registration:', err);
+          });
+        } else {
+          registeredShortcutRef.current = shortcut;
+        }
       } catch (err) {
         console.error('Failed to register shortcut:', err);
       }
     };
 
-    setupShortcut();
+    shortcutOperationRef.current = reconcileShortcut();
 
     return () => {
-      unregister(settings.globalShortcut).catch(console.error);
+      cancelled = true;
     };
   }, [settings.globalShortcut, isLoading]);
+
+  useEffect(() => {
+    return () => {
+      const shortcut = registeredShortcutRef.current;
+      registeredShortcutRef.current = null;
+      if (shortcut) {
+        unregister(shortcut).catch((err) => {
+          console.warn('Failed to unregister shortcut on shutdown:', err);
+        });
+      }
+    };
+  }, []);
 
   const applyTheme = useCallback((themeId: string) => {
     const theme = THEMES.find((t) => t.id === themeId);

@@ -346,13 +346,11 @@ select:focus-visible {
   text-transform: capitalize;
 }
 
-.settings-select-wrap,
-.settings-input-wrap {
+.settings-select-wrap {
   position: relative;
 }
 
-.settings-select,
-.settings-text-input {
+.settings-select {
   display: block;
   width: 100%;
   min-height: 38px;
@@ -369,8 +367,7 @@ select:focus-visible {
   cursor: pointer;
 }
 
-.settings-select:hover,
-.settings-text-input:hover {
+.settings-select:hover {
   border-color: rgba(120, 167, 255, 0.32);
   background: var(--card-hover);
 }
@@ -568,24 +565,162 @@ select:focus-visible {
   box-shadow: 0 0 0 1px rgba(120, 167, 255, 0.28), 0 2px 5px rgba(0, 0, 0, 0.35);
 }
 
-.settings-input-wrap {
+.shortcut-recorder {
+  display: grid;
+  gap: 8px;
+}
+
+.shortcut-recorder-row {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.settings-input-icon {
-  position: absolute;
-  left: 11px;
+.shortcut-recorder-control {
+  display: flex;
+  min-width: 0;
+  min-height: 52px;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--text-soft);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+}
+
+.shortcut-recorder-control:hover {
+  border-color: rgba(120, 167, 255, 0.4);
+  background: var(--card-hover);
+}
+
+.shortcut-recorder-control:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+.shortcut-recorder.is-recording .shortcut-recorder-control {
+  border-color: rgba(120, 167, 255, 0.78);
+  background: rgba(91, 141, 239, 0.11);
+  box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.shortcut-recorder-icon {
+  flex: 0 0 auto;
+  color: var(--accent-bright);
+}
+
+.shortcut-recorder-keys {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.shortcut-recorder-keys kbd {
+  display: inline-flex;
+  min-height: 25px;
+  align-items: center;
+  padding: 4px 7px;
+  border: 1px solid rgba(120, 167, 255, 0.23);
+  border-radius: 6px;
+  color: var(--text);
+  background: rgba(9, 11, 13, 0.36);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.shortcut-recorder-placeholder {
   color: var(--text-muted);
-  pointer-events: none;
+  font-size: 12px;
 }
 
-.settings-text-input {
-  padding: 8px 11px 8px 34px;
+.shortcut-recorder-action {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
-.settings-text-input::placeholder {
-  color: #687483;
+.shortcut-recorder-action.is-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent-bright);
+}
+
+.shortcut-recorder-action.is-live::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8bd8b2;
+  box-shadow: 0 0 0 3px rgba(139, 216, 178, 0.12);
+  content: '';
+}
+
+.shortcut-recorder-cancel {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  color: var(--text-muted);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.shortcut-recorder-cancel:hover {
+  border-color: rgba(255, 140, 140, 0.4);
+  color: #ffb0b0;
+  background: rgba(196, 72, 72, 0.14);
+}
+
+.shortcut-recorder-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 18px;
+}
+
+.shortcut-recorder-status {
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.shortcut-recorder.is-recording .shortcut-recorder-status {
+  color: var(--accent-bright);
+}
+
+.shortcut-recorder-reset {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  border: 0;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.shortcut-recorder-reset:hover {
+  color: var(--accent-bright);
 }
 
 .settings-saved-note {
@@ -641,5 +776,18 @@ input[type="checkbox"] {
     padding-right: 4px;
     padding-left: 4px;
     font-size: 10px;
+  }
+
+  .shortcut-recorder-action {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
