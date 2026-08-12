@@ -6,9 +6,9 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build:
     permissions:
-      contents: write
+      contents: read
 
     strategy:
       fail-fast: false
@@ -16,12 +16,16 @@ jobs:
         include:
           - platform: ubuntu-22.04
             args: ''
+            artifact: linux
           - platform: macos-latest
             args: '--target aarch64-apple-darwin'
+            artifact: macos-arm64
           - platform: macos-latest
             args: '--target x86_64-apple-darwin'
+            artifact: macos-x64
           - platform: windows-latest
             args: ''
+            artifact: windows
 
     runs-on: ${{ matrix.platform }}
 
@@ -48,7 +52,7 @@ jobs:
 
       - name: Get pnpm store directory
         shell: bash
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
@@ -76,21 +80,56 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Build and release
+      - name: Build application
         uses: tauri-apps/tauri-action@v0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NO_STRIP: ${{ matrix.platform == 'ubuntu-22.04' && 'true' || '' }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Always On Clock ${{ github.ref_name }}'
-          releaseBody: |
-            See the [CHANGELOG](https://github.com/emmsixx/always-on-clock/blob/main/CHANGELOG.md) for details.
-
-            ## Downloads
-            - **Windows**: `.msi` or `.exe` installer
-            - **macOS**: `.dmg` (Intel or Apple Silicon)
-            - **Linux**: `.deb` or `.AppImage`
-          releaseDraft: true
-          prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Upload platform bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundles-${{ matrix.artifact }}
+          path: src-tauri/target/release/bundle/
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_IS_PRERELEASE: ${{ contains(github.ref_name, '-') }}
+
+    steps:
+      - name: Download platform bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bundles-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create GitHub release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -d '' assets < <(find release-assets -type f -print0 | sort -z)
+          if (( ${#assets[@]} == 0 )); then
+            echo 'No release assets were downloaded.' >&2
+            exit 1
+          fi
+
+          release_args=(
+            --title "Always On Clock ${GITHUB_REF_NAME}"
+            --notes "Test build for ${GITHUB_REF_NAME}. See the attached platform installers below."
+          )
+
+          if [[ "${RELEASE_IS_PRERELEASE}" == 'true' ]]; then
+            release_args+=(--prerelease)
+          fi
+
+          gh release create "${GITHUB_REF_NAME}" "${assets[@]}" "${release_args[@]}"
