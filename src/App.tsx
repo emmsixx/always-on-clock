@@ -64,11 +64,13 @@ const AppContent: React.FC = () => {
     };
   }, [isLoading, updateSettings]);
 
+  // The shell hugs its content so the chrome chip lines up with the clock's own edges rather
+  // than stretching across a transparent window.
   return (
-    <>
+    <div className="overlay-shell">
       <TitleBar />
       <Clock />
-    </>
+    </div>
   );
 };
 

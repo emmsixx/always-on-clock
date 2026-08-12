@@ -1,0 +1,110 @@
+import React from 'react';
+import { useSettings } from '../../contexts/SettingsContext';
+import { FontSize, THEMES } from '../../types/settings';
+import { Field, Group } from '../ui/Field';
+import Segmented from '../ui/Segmented';
+import Slider from '../ui/Slider';
+import ColorField from '../ui/ColorField';
+import ThemePicker from '../ThemePicker';
+
+const AppearancePane: React.FC = () => {
+  const { settings, updateSettings, applyTheme } = useSettings();
+
+  const handleThemeChange = (themeId: string) => {
+    applyTheme(themeId);
+    const theme = THEMES.find((item) => item.id === themeId);
+
+    if (!theme || themeId === 'custom') {
+      updateSettings({ activeTheme: themeId });
+      return;
+    }
+
+    updateSettings({
+      activeTheme: themeId,
+      textColor: theme.textColor,
+      backgroundColor: theme.backgroundColor,
+      backgroundOpacity: theme.backgroundOpacity,
+    });
+  };
+
+  // Editing a color directly means the preset no longer describes the clock, so the selection
+  // follows the edit into Custom rather than lying about it.
+  const updateColor = (updates: { textColor?: string; backgroundColor?: string }) => {
+    updateSettings({ ...updates, activeTheme: 'custom' });
+    applyTheme('custom');
+  };
+
+  return (
+    <Group>
+      <Field label="Size" hint="Scales the whole readout, date included.">
+        <Segmented<FontSize>
+          label="Font size"
+          value={settings.fontSize}
+          onChange={(fontSize) => updateSettings({ fontSize })}
+          options={[
+            { value: 'small', label: 'Small' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'large', label: 'Large' },
+            { value: 'xlarge', label: 'Huge' },
+          ]}
+        />
+      </Field>
+
+      <Field label="Theme" hint="A starting point. Editing a color moves you to Custom.">
+        <ThemePicker
+          activeTheme={settings.activeTheme}
+          customTextColor={settings.textColor}
+          customBackgroundColor={settings.backgroundColor}
+          customBackgroundOpacity={settings.backgroundOpacity}
+          onSelect={handleThemeChange}
+        />
+      </Field>
+
+      <Field label="Colors" hint="Text, and the panel it sits on.">
+        <div className="color-row">
+          <ColorField
+            id="custom-text-color"
+            label="Text"
+            value={settings.textColor}
+            onChange={(textColor) => updateColor({ textColor })}
+          />
+          <ColorField
+            id="custom-background-color"
+            label="Background"
+            value={settings.backgroundColor}
+            onChange={(backgroundColor) => updateColor({ backgroundColor })}
+          />
+        </div>
+      </Field>
+
+      <Field
+        label="Transparency"
+        hint="Drop the background to nothing for a bare readout; drop the text to let the desktop win."
+      >
+        <div className="slider-stack">
+          <Slider
+            id="background-opacity"
+            label="Background"
+            value={settings.backgroundOpacity}
+            min={0}
+            max={1}
+            step={0.05}
+            onChange={(backgroundOpacity) => updateSettings({ backgroundOpacity })}
+          />
+          <Slider
+            id="text-opacity"
+            label="Text"
+            value={settings.textOpacity}
+            min={0.1}
+            max={1}
+            step={0.05}
+            onChange={(textOpacity) => updateSettings({ textOpacity })}
+            format={(value) => `${Math.round(value * 100)}%`}
+          />
+        </div>
+      </Field>
+    </Group>
+  );
+};
+
+export default AppearancePane;

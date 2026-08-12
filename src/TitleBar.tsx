@@ -7,8 +7,8 @@ import { Menu } from '@tauri-apps/api/menu';
 import { Clock1, PinIcon, Settings as SettingsIcon } from "lucide-react";
 
 let settingsWindowPromise: Promise<void> | null = null;
-const SETTINGS_WINDOW_WIDTH = 420;
-const SETTINGS_WINDOW_HEIGHT = 700;
+const SETTINGS_WINDOW_WIDTH = 760;
+const SETTINGS_WINDOW_HEIGHT = 560;
 
 async function createSettingsWindow() {
   const existing = await WebviewWindow.getByLabel('settings');
@@ -49,12 +49,16 @@ async function createSettingsWindow() {
     title: 'Settings',
     width: SETTINGS_WINDOW_WIDTH,
     height: SETTINGS_WINDOW_HEIGHT,
+    minWidth: 620,
+    minHeight: 480,
     x,
     y,
     preventOverflow: true,
-    resizable: false,
+    resizable: true,
     decorations: false,
     transparent: false,
+    // Matches --bg-chrome, so the window paints its own surface instead of flashing white.
+    backgroundColor: [11, 12, 14, 255],
   });
 
   await new Promise<void>((resolve, reject) => {
@@ -158,41 +162,35 @@ const TitleBar: React.FC = () => {
     await currentWindow.setIgnoreCursorEvents(value);
   };
 
+  if (onTop === null || onTop) return null;
+
   return (
-    <>
-      {onTop === null ? (
-        <div className="p-2 text-gray-400">Loading...</div>
-      ) : onTop ? null : (
-        <div
-          data-tauri-drag-region
-          className="w-full cursor-move flex flex-row justify-between items-center text-white text-lg bg-[#0c0d0f] transition-all"
-          style={{ padding: '14px 28px' }}
+    <div className="chrome" data-tauri-drag-region>
+      <span className="chrome-grip" data-tauri-drag-region aria-hidden="true">
+        <Clock1 size={14} strokeWidth={2.2} />
+        <span className="chrome-name">Always On Clock</span>
+      </span>
+      <span className="chrome-actions">
+        <button
+          type="button"
+          className="chrome-button"
+          onClick={() => void openSettingsWindow()}
+          aria-label="Open settings"
+          title="Settings"
         >
-          <div className="flex flex-row items-center space-x-2.5 pointer-events-none">
-            <Clock1 className="w-5 h-5" />
-            <span className="text-sm font-medium">Clock</span>
-          </div>
-          <div className="flex flex-row items-center space-x-1.5">
-            <button
-              className="p-2 hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
-              onClick={() => void openSettingsWindow()}
-              aria-label="Open settings"
-              title="Settings"
-            >
-              <SettingsIcon className="w-4 h-4" />
-            </button>
-            <button
-              className="p-2 hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
-              onClick={() => void setTop(true)}
-              aria-label="Pin window"
-              title="Pin window (always on top)"
-            >
-              <PinIcon className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+          <SettingsIcon size={15} strokeWidth={2.1} />
+        </button>
+        <button
+          type="button"
+          className="chrome-button chrome-button--pin"
+          onClick={() => void setTop(true)}
+          aria-label="Pin above all windows"
+          title="Pin above all windows — the clock becomes click-through"
+        >
+          <PinIcon size={15} strokeWidth={2.1} />
+        </button>
+      </span>
+    </div>
   );
 };
 

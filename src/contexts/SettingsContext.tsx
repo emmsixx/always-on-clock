@@ -18,8 +18,14 @@ interface SettingsContextType {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => Promise<void>;
   applyTheme: (themeId: string) => void;
+  resetSettings: () => Promise<void>;
   isLoading: boolean;
+  /** Timestamp of the most recent write, so the UI can acknowledge it. */
+  lastSavedAt: number | null;
 }
+
+/** Window geometry is remembered state, not a preference, so a reset leaves it alone. */
+const PRESERVED_ON_RESET: Array<keyof Settings> = ['windowPosition', 'windowSize'];
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
@@ -38,6 +44,7 @@ interface SettingsProviderProps {
 export function SettingsProvider({ children }: SettingsProviderProps) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const settingsRef = useRef(settings);
   const registeredShortcutRef = useRef<string | null>(null);
   const shortcutOperationRef = useRef<Promise<void>>(Promise.resolve());
@@ -243,6 +250,8 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       throw err;
     }
 
+    setLastSavedAt(Date.now());
+
     try {
       await emit(SETTINGS_UPDATED_EVENT, updates);
     } catch (err) {
@@ -250,8 +259,22 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     }
   }, []);
 
+  const resetSettings = useCallback(async () => {
+    const updates = (Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>).reduce<Partial<Settings>>(
+      (acc, key) => {
+        if (PRESERVED_ON_RESET.includes(key)) return acc;
+        return Object.assign(acc, { [key]: DEFAULT_SETTINGS[key] });
+      },
+      {},
+    );
+
+    await updateSettings(updates);
+  }, [updateSettings]);
+
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, applyTheme, isLoading }}>
+    <SettingsContext.Provider
+      value={{ settings, updateSettings, applyTheme, resetSettings, isLoading, lastSavedAt }}
+    >
       {children}
     </SettingsContext.Provider>
   );
