@@ -17,15 +17,19 @@ jobs:
           - platform: ubuntu-22.04
             args: ''
             artifact: linux
+            bundle-path: src-tauri/target/release/bundle/
           - platform: macos-latest
             args: '--target aarch64-apple-darwin'
             artifact: macos-arm64
+            bundle-path: src-tauri/target/aarch64-apple-darwin/release/bundle/
           - platform: macos-latest
             args: '--target x86_64-apple-darwin'
             artifact: macos-x64
+            bundle-path: src-tauri/target/x86_64-apple-darwin/release/bundle/
           - platform: windows-latest
             args: ''
             artifact: windows
+            bundle-path: src-tauri/target/release/bundle/
 
     runs-on: ${{ matrix.platform }}
 
@@ -91,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bundles-${{ matrix.artifact }}
-          path: src-tauri/target/release/bundle/
+          path: ${{ matrix.bundle-path }}
           if-no-files-found: error
           retention-days: 14
 
