@@ -10,6 +10,9 @@ import {
 import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { emit, listen } from '@tauri-apps/api/event';
+
+const SETTINGS_UPDATED_EVENT = 'settings-updated';
 
 interface SettingsContextType {
   settings: Settings;
@@ -40,21 +43,41 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   useEffect(() => {
     let disposed = false;
-    let unlisten: (() => void) | null = null;
+    let unlistenStore: (() => void) | null = null;
+    let unlistenSettingsEvent: (() => void) | null = null;
     const pendingUpdates: Partial<Settings> = {};
+
+    const applyUpdates = (updates: Partial<Settings>) => {
+      Object.assign(pendingUpdates, updates);
+      setSettings((previous) => ({ ...previous, ...updates }));
+    };
 
     const initialize = async () => {
       let loaded = DEFAULT_SETTINGS;
 
       try {
+        const settingsEventCleanup = await listen<Partial<Settings>>(
+          SETTINGS_UPDATED_EVENT,
+          ({ payload }) => {
+            if (disposed || !payload || typeof payload !== 'object') return;
+            applyUpdates(payload);
+          },
+        );
+
+        if (disposed) {
+          settingsEventCleanup();
+          return;
+        }
+
+        unlistenSettingsEvent = settingsEventCleanup;
+
         const store = await getStore();
         const cleanup = await store.onChange<unknown>((key, value) => {
           if (disposed) return;
 
           if (key === LEGACY_SETTINGS_KEY && value && typeof value === 'object') {
             const updates = value as Partial<Settings>;
-            Object.assign(pendingUpdates, updates);
-            setSettings((previous) => ({ ...previous, ...updates }));
+            applyUpdates(updates);
             return;
           }
 
@@ -62,16 +85,16 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
           if (!settingName) return;
 
           const nextValue = value === undefined ? DEFAULT_SETTINGS[settingName] : value;
-          Object.assign(pendingUpdates, { [settingName]: nextValue });
-          setSettings((previous) => ({ ...previous, [settingName]: nextValue }));
+          applyUpdates({ [settingName]: nextValue } as Partial<Settings>);
         });
 
         if (disposed) {
           cleanup();
+          unlistenSettingsEvent?.();
           return;
         }
 
-        unlisten = cleanup;
+        unlistenStore = cleanup;
         loaded = await loadSettings();
       } catch (err) {
         console.error('Failed to initialize settings:', err);
@@ -88,7 +111,8 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
     return () => {
       disposed = true;
-      unlisten?.();
+      unlistenStore?.();
+      unlistenSettingsEvent?.();
     };
   }, []);
 
@@ -203,6 +227,11 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const updateSettings = useCallback(async (updates: Partial<Settings>) => {
     setSettings((previous) => ({ ...previous, ...updates }));
     await saveSettings(updates);
+    try {
+      await emit(SETTINGS_UPDATED_EVENT, updates);
+    } catch (err) {
+      console.warn('Failed to synchronize settings between windows:', err);
+    }
   }, []);
 
   return (
