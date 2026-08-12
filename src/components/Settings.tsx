@@ -7,9 +7,9 @@ import {
   Eye,
   Keyboard,
   Palette,
-  Rocket,
   SlidersHorizontal,
   Type,
+  Zap,
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { DEFAULT_SETTINGS, THEMES, FONT_SIZES, TimeFormat, DateFormat, FontSize } from '../types/settings';
@@ -73,21 +73,21 @@ const Settings: React.FC = () => {
       <div className="settings-intro">
         <div className="settings-eyebrow">
           <SlidersHorizontal size={13} strokeWidth={2.3} />
-          <span>Personalize your clock</span>
+          <span>Clock settings</span>
         </div>
-        <p>Make the overlay feel at home on your desktop.</p>
+        <p>Tune the overlay for your workspace.</p>
       </div>
 
       <SettingCard
         icon={Clock3}
         title="Clock display"
-        description="Choose what the clock shows and how it reads."
+        description="Choose the time, seconds, and date."
       >
         <div className="settings-field settings-field--stacked">
           <div className="settings-field-heading">
             <div className="settings-field-copy">
               <span className="settings-label">Time format</span>
-              <span className="settings-help">Use the format that feels most natural.</span>
+              <span className="settings-help">Choose the clock format you already use.</span>
             </div>
             <span className="settings-value">{settings.timeFormat === '12h' ? '12-hour' : '24-hour'}</span>
           </div>
@@ -134,7 +134,7 @@ const Settings: React.FC = () => {
           <div className="settings-field-heading">
             <div className="settings-field-copy">
               <label htmlFor="date-format" className="settings-label">Date display</label>
-              <span className="settings-help">Keep the date nearby, or keep things minimal.</span>
+              <span className="settings-help">Show a date when you need more context.</span>
             </div>
             <CalendarDays size={15} className="settings-muted-icon" aria-hidden="true" />
           </div>
@@ -159,13 +159,13 @@ const Settings: React.FC = () => {
       <SettingCard
         icon={Palette}
         title="Appearance"
-        description="Shape the scale, color, and transparency of the overlay."
+        description="Tune the size, color, and transparency."
       >
         <div className="settings-field settings-field--stacked">
           <div className="settings-field-heading">
             <div className="settings-field-copy">
               <span className="settings-label">Font size</span>
-              <span className="settings-help">Set the visual weight of the clock.</span>
+              <span className="settings-help">Make the clock easier to scan.</span>
             </div>
             <Type size={15} className="settings-muted-icon" aria-hidden="true" />
           </div>
@@ -188,7 +188,7 @@ const Settings: React.FC = () => {
           <div className="settings-field-heading">
             <div className="settings-field-copy">
               <span className="settings-label">Theme</span>
-              <span className="settings-help">Start with a preset, then make it yours.</span>
+              <span className="settings-help">Choose a starting point for the overlay.</span>
             </div>
             <span className="settings-value">{THEMES.find((theme) => theme.id === settings.activeTheme)?.name}</span>
           </div>
@@ -249,7 +249,7 @@ const Settings: React.FC = () => {
           <div className="settings-field-heading">
             <div className="settings-field-copy">
               <span className="settings-label">Opacity</span>
-              <span className="settings-help">Balance contrast with the desktop behind it.</span>
+              <span className="settings-help">Keep the clock legible without taking over.</span>
             </div>
             <Eye size={15} className="settings-muted-icon" aria-hidden="true" />
           </div>
@@ -294,9 +294,9 @@ const Settings: React.FC = () => {
       </SettingCard>
 
       <SettingCard
-        icon={Rocket}
+        icon={Zap}
         title="Behavior"
-        description="Control how the app opens and responds around your workflow."
+        description="Choose how the clock starts and hides."
       >
         <div className="settings-field settings-field--stacked">
           <div className="settings-field-heading">
