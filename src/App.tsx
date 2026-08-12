@@ -42,7 +42,7 @@ const AppContent: React.FC = () => {
       if (saveTimeout) clearTimeout(saveTimeout);
       saveTimeout = window.setTimeout(async () => {
         const pos = await win.innerPosition();
-        updateSettings({ windowPosition: { x: pos.x, y: pos.y } });
+        void updateSettings({ windowPosition: { x: pos.x, y: pos.y } }).catch(() => undefined);
       }, 500);
     };
 
@@ -50,7 +50,9 @@ const AppContent: React.FC = () => {
       if (saveTimeout) clearTimeout(saveTimeout);
       saveTimeout = window.setTimeout(async () => {
         const size = await win.innerSize();
-        updateSettings({ windowSize: { width: size.width, height: size.height } });
+        void updateSettings({
+          windowSize: { width: size.width, height: size.height },
+        }).catch(() => undefined);
       }, 500);
     };
 

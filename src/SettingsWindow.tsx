@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Check, Clock3, Info, Palette, Sliders, X, Zap } from "lucide-react";
+import { AlertTriangle, Check, Clock3, Info, Palette, Sliders, X, Zap } from "lucide-react";
 import { SettingsProvider, useSettings } from "./contexts/SettingsContext";
 import ClockPreview from "./components/ClockPreview";
 import ClockPane from "./components/panes/ClockPane";
@@ -19,7 +19,7 @@ const SECTIONS = [
 type SectionId = (typeof SECTIONS)[number]["id"];
 
 const SettingsWindowContent: React.FC = () => {
-  const { settings, isLoading, lastSavedAt } = useSettings();
+  const { settings, isLoading, lastSavedAt, saveError } = useSettings();
   const [section, setSection] = useState<SectionId>("clock");
   const [justSaved, setJustSaved] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -114,7 +114,7 @@ const SettingsWindowContent: React.FC = () => {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  aria-controls={`pane-${item.id}`}
+                  aria-controls={isActive ? `pane-${item.id}` : undefined}
                   tabIndex={isActive ? 0 : -1}
                   className={`settings-nav-item ${isActive ? "is-active" : ""}`.trim()}
                   onClick={() => setSection(item.id)}
@@ -126,11 +126,19 @@ const SettingsWindowContent: React.FC = () => {
             })}
           </div>
 
-          <p className={`settings-status ${justSaved ? "is-saved" : ""}`.trim()}>
+          <p
+            className={`settings-status ${saveError ? "is-error" : justSaved ? "is-saved" : ""}`.trim()}
+          >
             <span className="settings-status-icon" aria-hidden="true">
-              <Check size={11} strokeWidth={3} />
+              {saveError ? (
+                <AlertTriangle size={10} strokeWidth={2.8} />
+              ) : (
+                <Check size={11} strokeWidth={3} />
+              )}
             </span>
-            <span aria-live="polite">{justSaved ? "Saved" : "Changes save instantly"}</span>
+            <span aria-live="polite">
+              {saveError ? saveError : justSaved ? "Saved" : "Changes save instantly"}
+            </span>
           </p>
         </nav>
 
@@ -152,10 +160,8 @@ const SettingsWindowContent: React.FC = () => {
                   key={section}
                   tabIndex={-1}
                 >
-                  {/* The rail already names the section a few inches away, so the visible
-                      heading would only repeat it; the blurb carries the useful part. */}
                   <div className="pane-heading">
-                    <h2 className="sr-only">{active.label}</h2>
+                    <h2>{active.label}</h2>
                     <p>{active.blurb}</p>
                   </div>
                   {section === "clock" && <ClockPane />}

@@ -75,7 +75,7 @@ const AboutPane: React.FC = () => {
               type="button"
               className="button button--danger"
               onClick={() => {
-                void resetSettings();
+                void resetSettings().catch(() => undefined);
                 setConfirmingReset(false);
               }}
             >

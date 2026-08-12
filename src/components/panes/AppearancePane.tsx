@@ -8,30 +8,28 @@ import ColorField from '../ui/ColorField';
 import ThemePicker from '../ThemePicker';
 
 const AppearancePane: React.FC = () => {
-  const { settings, updateSettings, applyTheme } = useSettings();
+  const { settings, updateSettings } = useSettings();
 
   const handleThemeChange = (themeId: string) => {
-    applyTheme(themeId);
     const theme = THEMES.find((item) => item.id === themeId);
 
     if (!theme || themeId === 'custom') {
-      updateSettings({ activeTheme: themeId });
+      void updateSettings({ activeTheme: themeId }).catch(() => undefined);
       return;
     }
 
-    updateSettings({
+    void updateSettings({
       activeTheme: themeId,
       textColor: theme.textColor,
       backgroundColor: theme.backgroundColor,
       backgroundOpacity: theme.backgroundOpacity,
-    });
+    }).catch(() => undefined);
   };
 
   // Editing a color directly means the preset no longer describes the clock, so the selection
   // follows the edit into Custom rather than lying about it.
   const updateColor = (updates: { textColor?: string; backgroundColor?: string }) => {
-    updateSettings({ ...updates, activeTheme: 'custom' });
-    applyTheme('custom');
+    void updateSettings({ ...updates, activeTheme: 'custom' }).catch(() => undefined);
   };
 
   return (
@@ -40,7 +38,7 @@ const AppearancePane: React.FC = () => {
         <Segmented<FontSize>
           label="Font size"
           value={settings.fontSize}
-          onChange={(fontSize) => updateSettings({ fontSize })}
+          onChange={(fontSize) => void updateSettings({ fontSize }).catch(() => undefined)}
           options={[
             { value: 'small', label: 'Small' },
             { value: 'medium', label: 'Medium' },
@@ -89,7 +87,9 @@ const AppearancePane: React.FC = () => {
             min={0}
             max={1}
             step={0.05}
-            onChange={(backgroundOpacity) => updateSettings({ backgroundOpacity })}
+            onChange={(backgroundOpacity) =>
+              void updateSettings({ backgroundOpacity }).catch(() => undefined)
+            }
           />
           <Slider
             id="text-opacity"
@@ -98,7 +98,7 @@ const AppearancePane: React.FC = () => {
             min={0.1}
             max={1}
             step={0.05}
-            onChange={(textOpacity) => updateSettings({ textOpacity })}
+            onChange={(textOpacity) => void updateSettings({ textOpacity }).catch(() => undefined)}
             format={(value) => `${Math.round(value * 100)}%`}
           />
         </div>

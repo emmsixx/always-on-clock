@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { Settings, DEFAULT_SETTINGS, THEMES } from '../types/settings';
+import { Settings, DEFAULT_SETTINGS } from '../types/settings';
 import {
   getSettingName,
   getStore,
@@ -17,11 +17,11 @@ const SETTINGS_UPDATED_EVENT = 'settings-updated';
 interface SettingsContextType {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => Promise<void>;
-  applyTheme: (themeId: string) => void;
   resetSettings: () => Promise<void>;
   isLoading: boolean;
   /** Timestamp of the most recent write, so the UI can acknowledge it. */
   lastSavedAt: number | null;
+  saveError: string | null;
 }
 
 /** Window geometry is remembered state, not a preference, so a reset leaves it alone. */
@@ -45,9 +45,12 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const settingsRef = useRef(settings);
   const registeredShortcutRef = useRef<string | null>(null);
   const shortcutOperationRef = useRef<Promise<void>>(Promise.resolve());
+  const saveOperationRef = useRef<Promise<void>>(Promise.resolve());
+  const settingsUpdateVersionRef = useRef(0);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -221,32 +224,30 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     };
   }, []);
 
-  const applyTheme = useCallback((themeId: string) => {
-    const theme = THEMES.find((t) => t.id === themeId);
-    if (theme && theme.id !== 'custom') {
-      setSettings((prev) => ({
-        ...prev,
-        activeTheme: themeId,
-        textColor: theme.textColor,
-        backgroundColor: theme.backgroundColor,
-        backgroundOpacity: theme.backgroundOpacity,
-      }));
-    } else {
-      setSettings((prev) => ({ ...prev, activeTheme: themeId }));
-    }
-  }, []);
-
   const updateSettings = useCallback(async (updates: Partial<Settings>) => {
     const previousSettings = settingsRef.current;
     const nextSettings = { ...previousSettings, ...updates };
+    const updateVersion = ++settingsUpdateVersionRef.current;
     settingsRef.current = nextSettings;
     setSettings(nextSettings);
+    setSaveError(null);
+
+    const saveOperation = saveOperationRef.current
+      .catch(() => undefined)
+      .then(() => saveSettings(updates));
+    saveOperationRef.current = saveOperation;
 
     try {
-      await saveSettings(updates);
+      await saveOperation;
     } catch (err) {
-      settingsRef.current = previousSettings;
-      setSettings(previousSettings);
+      if (
+        updateVersion === settingsUpdateVersionRef.current &&
+        settingsRef.current === nextSettings
+      ) {
+        settingsRef.current = previousSettings;
+        setSettings(previousSettings);
+        setSaveError('Could not save changes. Try again.');
+      }
       throw err;
     }
 
@@ -273,7 +274,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   return (
     <SettingsContext.Provider
-      value={{ settings, updateSettings, applyTheme, resetSettings, isLoading, lastSavedAt }}
+      value={{ settings, updateSettings, resetSettings, isLoading, lastSavedAt, saveError }}
     >
       {children}
     </SettingsContext.Provider>

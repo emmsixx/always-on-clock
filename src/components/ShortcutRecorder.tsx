@@ -4,7 +4,7 @@ import { Keyboard, RotateCcw, X } from 'lucide-react';
 interface ShortcutRecorderProps {
   value: string;
   defaultValue: string;
-  onChange: (value: string) => void;
+  onChange: (value: string) => void | Promise<void>;
 }
 
 const MODIFIER_ORDER = ['CommandOrControl', 'Alt', 'Shift'];
@@ -109,6 +109,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
   const controlRef = useRef<HTMLButtonElement>(null);
   const onChangeRef = useRef(onChange);
   const pressedCodesRef = useRef(new Set<string>());
+  const saveAttemptRef = useRef(0);
   const [isRecording, setIsRecording] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('Press the keys you want to use.');
@@ -128,6 +129,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       if (event.key === 'Escape' || code === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
+        saveAttemptRef.current += 1;
         pressedCodesRef.current.clear();
         setPressedKeys([]);
         setIsRecording(false);
@@ -148,11 +150,26 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
       const pressedPrimaryKey = pressedToken !== null && !MODIFIER_ORDER.includes(pressedToken);
 
       if (pressedPrimaryKey && parts.length > 1 && hasModifier(parts)) {
-        onChangeRef.current(parts.join('+'));
+        const shortcut = parts.join('+');
+        const saveAttempt = ++saveAttemptRef.current;
         pressedCodesRef.current.clear();
         setPressedKeys([]);
         setIsRecording(false);
-        setFeedback('Saved. This shortcut now toggles the clock.');
+        setFeedback('Saving…');
+        void Promise.resolve()
+          .then(() => onChangeRef.current(shortcut))
+          .then(
+            () => {
+              if (saveAttempt === saveAttemptRef.current) {
+                setFeedback('Saved. This shortcut now toggles the clock.');
+              }
+            },
+            () => {
+              if (saveAttempt === saveAttemptRef.current) {
+                setFeedback('Could not save. The previous shortcut is still active.');
+              }
+            },
+          );
       } else if (parts.some((part) => !MODIFIER_ORDER.includes(part))) {
         setFeedback('That key needs a modifier. Hold Ctrl / ⌘, Alt, or Shift first.');
       }
@@ -174,6 +191,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
   }, [isRecording]);
 
   const startRecording = () => {
+    saveAttemptRef.current += 1;
     pressedCodesRef.current.clear();
     setPressedKeys([]);
     setFeedback('Hold Ctrl / ⌘, Alt, or Shift, then press a key. Esc cancels.');
@@ -182,6 +200,7 @@ const ShortcutRecorder: React.FC<ShortcutRecorderProps> = ({ value, defaultValue
   };
 
   const cancelRecording = () => {
+    saveAttemptRef.current += 1;
     pressedCodesRef.current.clear();
     setPressedKeys([]);
     setIsRecording(false);

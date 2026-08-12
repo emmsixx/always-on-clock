@@ -25,7 +25,9 @@ const BehaviorPane: React.FC = () => {
         label="Launch on startup"
         hint="Opens the clock when you sign in, already where you left it."
         checked={settings.launchOnStartup}
-        onChange={(launchOnStartup) => updateSettings({ launchOnStartup })}
+        onChange={(launchOnStartup) =>
+          void updateSettings({ launchOnStartup }).catch(() => undefined)
+        }
       />
 
       <div className="note">

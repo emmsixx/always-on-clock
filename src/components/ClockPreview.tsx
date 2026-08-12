@@ -44,7 +44,7 @@ const ClockPreview: React.FC<{ settings: Settings }> = ({ settings }) => {
           textOpacity={settings.textOpacity}
           backgroundColor={settings.backgroundColor}
           backgroundOpacity={settings.backgroundOpacity}
-          scale={0.78}
+          scale={1.1}
           className="preview-clock"
         />
       </div>

@@ -21,7 +21,7 @@ const ColorField: React.FC<ColorFieldProps> = ({ id, label, value, onChange }) =
   }, [value]);
 
   const handleTextChange = (next: string) => {
-    const normalized = next.startsWith('#') ? next : `#${next}`;
+    const normalized = next === '' ? '' : next.startsWith('#') ? next : `#${next}`;
     setDraft(normalized);
     if (HEX.test(normalized)) {
       onChange(normalized.toLowerCase());

@@ -27,7 +27,7 @@ const ClockPane: React.FC = () => {
         <Segmented<TimeFormat>
           label="Time format"
           value={settings.timeFormat}
-          onChange={(timeFormat) => updateSettings({ timeFormat })}
+          onChange={(timeFormat) => void updateSettings({ timeFormat }).catch(() => undefined)}
           options={[
             { value: '12h', label: '12-hour', sample: '2:45 PM' },
             { value: '24h', label: '24-hour', sample: '14:45' },
@@ -39,7 +39,7 @@ const ClockPane: React.FC = () => {
         label="Show seconds"
         hint="Adds a ticking seconds field. Useful for timing, busier at a glance."
         checked={settings.showSeconds}
-        onChange={(showSeconds) => updateSettings({ showSeconds })}
+        onChange={(showSeconds) => void updateSettings({ showSeconds }).catch(() => undefined)}
       />
 
       <Field
@@ -51,7 +51,7 @@ const ClockPane: React.FC = () => {
           id="date-format"
           value={settings.dateFormat}
           options={dateOptions}
-          onChange={(dateFormat) => updateSettings({ dateFormat })}
+          onChange={(dateFormat) => void updateSettings({ dateFormat }).catch(() => undefined)}
         />
       </Field>
     </Group>
