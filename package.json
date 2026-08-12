@@ -1,7 +1,7 @@
 {
   "name": "always-on-clock",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight, customizable desktop clock overlay that stays always-on-top",
   "type": "module",
   "packageManager": "pnpm@10.26.0",
@@ -21,7 +21,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "sync-release-version": "node scripts/sync-release-version.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",

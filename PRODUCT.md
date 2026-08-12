@@ -43,7 +43,7 @@ Constraints:
 
 ## Evidence on Hand
 
-Working application code and README only. No user research, testimonials, install counts, press, or benchmarks exist — future work must not invent them. Version is `1.0.0` in `package.json` and `src-tauri/tauri.conf.json`.
+Working application code and README only. No user research, testimonials, install counts, press, or benchmarks exist — future work must not invent them. Release builds synchronize their version from the Git tag; the current release is `1.0.1`.
 
 ## Product Principles
 
