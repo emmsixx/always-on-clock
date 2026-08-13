@@ -7,6 +7,7 @@ A lightweight, customizable desktop clock overlay built with Tauri, React, and T
 ## Features
 
 - **Always-on-Top Mode** - Pin the clock to stay above other windows
+- **Minimal Resources Used** - ~5MB idle, <1% cpu usage
 - **Transparent Overlay** - Click-through when pinned, allowing interaction with windows behind
 - **Time Format Options** - Switch between 12-hour and 24-hour formats
 - **Seconds Display** - Toggle seconds visibility
